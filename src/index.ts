@@ -11,13 +11,7 @@ express()
 .use("/auth", auth_router)
 
 .get("/", (req, res) => {
-    try {
-        throw new Error("Test error");
-    }
-    catch (err) {
-        console.log(err, "ERR");
-    }
-    res.send("Hello World!")
+    
 })
 
 .listen(3000, () => 

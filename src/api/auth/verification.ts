@@ -9,7 +9,8 @@ const usersDb = new MongoClient(process.env["MONGODB_URI"]!)
     .db("auth")
     .collection("users");
 
-type DbRecord = {
+type UserAuthData = {
+    /** User id in all user-related collections */
     _id  : ObjectId,
     name : string,
     hash : string,
@@ -35,7 +36,7 @@ export const createUser = (username: string, password: string) =>
     }));
 
 export const verifyUser = (username: string, password: string) =>
-    usersDb.findOne<DbRecord>({ name: username })
+    usersDb.findOne<UserAuthData>({ name: username })
     .then(async user => {
         if (
             user && 
@@ -51,12 +52,12 @@ export const verifyUser = (username: string, password: string) =>
     .catch(_ => null);
 
 export const usernameExists = (username: string) =>
-    usersDb.findOne<DbRecord>({ name: username })
+    usersDb.findOne<UserAuthData>({ name: username })
         .then(user => !!user)
         .catch(_ => false);
 
-export const userIdExists = (userId: string) =>
-    usersDb.findOne<DbRecord>({ _id: ObjectId.createFromHexString(userId) })
+export const userExists = (userId: string) =>
+    usersDb.findOne<UserAuthData>({ _id: ObjectId.createFromHexString(userId) })
         .then(user => !!user)
         .catch(_ => false);
 

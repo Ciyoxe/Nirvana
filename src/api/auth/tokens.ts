@@ -1,4 +1,4 @@
-import jwt    from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import {
     verifyUser,
     createUser,
@@ -6,15 +6,13 @@ import {
 } from "./verification";
 
 
-const jwtSecret = process.env["JWT_SECRET"]!;
-
 const generateToken = (userId: string) =>
-    jwt.sign({ _id: userId }, jwtSecret, { expiresIn: "7d", algorithm: "HS384" });
+    jwt.sign({ _id: userId }, process.env["JWT_SECRET"]!, { expiresIn: "7d", algorithm: "HS384" });
 
 
 export const register = async (username: string, password: string) => {
     if (username.length === 0 || password.length === 0) {
-        throw new Error("Username and password are required");
+        throw new Error("Username and password required");
     }
     if (await usernameExists(username)) {
         throw new Error("Username already exists");
@@ -28,7 +26,7 @@ export const register = async (username: string, password: string) => {
 
 export const authorize = async (username: string, password: string) => {
     if (username.length === 0 || password.length === 0) {
-        throw new Error("Username and password are required");
+        throw new Error("Username and password required");
     }
     
     const user = await verifyUser(username, password);

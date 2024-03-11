@@ -1,7 +1,7 @@
-import   passport   from "passport";
-import { ObjectId } from "mongodb";
-import { Strategy } from "passport-jwt";
-import { userIdExists } from "./verification";
+import   passport     from "passport";
+import { ObjectId }   from "mongodb";
+import { Strategy }   from "passport-jwt";
+import { userExists } from "./verification";
 
 
 passport.use(
@@ -12,7 +12,7 @@ passport.use(
             jwtFromRequest : req => req.cookies?.jwt ?? null,
         },
         async (payload, done) => {
-            if (await userIdExists(payload._id))
+            if (await userExists(payload._id))
                 done(null, ObjectId.createFromHexString(payload._id));
             else 
                 done(null, false);

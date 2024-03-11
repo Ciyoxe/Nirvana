@@ -11,7 +11,7 @@ import {
 
 const strict_limit = rateLimit({
     windowMs : 5000 * 60, // 5 min,
-    limit    : 20,
+    limit    : 5,
 });
 const medium_limit = rateLimit({
     windowMs : 1000 * 20, // 20 sec,
@@ -20,10 +20,10 @@ const medium_limit = rateLimit({
 
 export default express.Router()
 
-.get("/check", medium_limit, async (req, res) => {
+.get("/username-exists", medium_limit, async (req, res) => {
     try {
         res.json({
-            success : req.body.username && await usernameExists(req.body.username),
+            exists : await usernameExists(req.body.username.toString()),
         });
     }
     catch (err) {
@@ -34,8 +34,8 @@ export default express.Router()
 .post("/login", strict_limit, async (req, res) => {
     try {
         const token = await authorize(
-            req.body.username,
-            req.body.password
+            req.body.username.toString(),
+            req.body.password.toString(),
         );
         if (token === null) {
             res.status(401).send("Wrong credentials");
@@ -46,7 +46,7 @@ export default express.Router()
             httpOnly : true, 
             secure   : false // TODO: make true
         });
-        res.send("Ok");
+        res.json({ success: true });
     }
     catch (err) {
         res.status(400).send(err);
@@ -56,15 +56,15 @@ export default express.Router()
 .post("/signup", strict_limit, async (req, res) => {
     try {
         const token = await register(
-            req.body.username,
-            req.body.password
+            req.body.username.toString(),
+            req.body.password.toString(),
         );
         res.cookie("jwt", token, { 
             expires  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
             httpOnly : true, 
             secure   : false // TODO: make true
         });
-        res.send("Ok");
+        res.json({ success: true });
     }
     catch (err) {
         res.status(400).send(err);
@@ -73,7 +73,7 @@ export default express.Router()
 
 .post("/logout", strict_limit, (req, res) => {
     res.clearCookie("jwt");
-    res.send("Ok");
+    res.json({ success: true });
 });
 
 
