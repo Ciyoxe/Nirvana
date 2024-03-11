@@ -20,7 +20,7 @@ const medium_limit = rateLimit({
 
 export default express.Router()
 
-.get("/username-exists", medium_limit, async (req, res) => {
+.post("/username-exists", medium_limit, async (req, res) => {
     try {
         res.json({
             exists : await usernameExists(req.body.username.toString()),
