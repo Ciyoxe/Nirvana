@@ -1,13 +1,11 @@
 import jwt from "jsonwebtoken";
-import {
-    verifyUser,
-    createUser,
-    usernameExists,
-} from "./verification";
+
+import { verifyUser, createUser,usernameExists } from "./verification";
+import { getEnv } from "../../utils";
 
 
 const generateToken = (userId: string) =>
-    jwt.sign({ _id: userId }, process.env["JWT_SECRET"]!, { expiresIn: "7d", algorithm: "HS384" });
+    jwt.sign({ _id: userId }, getEnv("JWT_SECRET"), { expiresIn: "7d", algorithm: "HS384" });
 
 
 export const register = async (username: string, password: string) => {

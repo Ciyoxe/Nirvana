@@ -1,10 +1,11 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
 import z from "zod";
+import winston from "winston"
 
 import { authorize, register } from "./tokens";
 import { usernameExists } from "./verification";
-import { ErrorHanlder, errorToString } from "../../utils";
+import { ErrorHanlder, errorToString, getEnv } from "../../utils";
 
 
 const hardLimit = rateLimit({
@@ -52,7 +53,7 @@ const authRequest = z.object({
     res.cookie("jwt", token, { 
         expires  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
         httpOnly : true, 
-        secure   : false // TODO: make true
+        secure   : getEnv("NODE_ENV") === "production"
     });
     res.json({ success: true });
 })
@@ -72,7 +73,7 @@ const authRequest = z.object({
     res.cookie("jwt", token, { 
         expires  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
         httpOnly : true, 
-        secure   : false // TODO: make true
+        secure   : getEnv("NODE_ENV") === "production",
     });
     res.json({ success: true });
 })

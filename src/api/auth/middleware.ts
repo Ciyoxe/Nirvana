@@ -1,14 +1,16 @@
-import   passport     from "passport";
-import { ObjectId }   from "mongodb";
-import { Strategy }   from "passport-jwt";
+import passport from "passport";
+import { ObjectId } from "mongodb";
+import { Strategy } from "passport-jwt";
+
 import { userExists } from "./verification";
+import { getEnv } from "../../utils";
 
 
 passport.use(
     new Strategy(
         {
             algorithms     : ["HS384", "HS512"],
-            secretOrKey    : process.env["JWT_SECRET"]!,
+            secretOrKey    : getEnv("JWT_SECRET"),
             jwtFromRequest : req => req.cookies?.jwt ?? null,
         },
         async (payload, done) => {

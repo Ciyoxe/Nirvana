@@ -1,11 +1,10 @@
 import crypto from "crypto";
-import { 
-    MongoClient, 
-    ObjectId 
-} from "mongodb";
+import {MongoClient, ObjectId } from "mongodb";
+
+import { getEnv } from "../../utils";
 
 
-const usersDb = new MongoClient(process.env["MONGODB_URI"]!)
+const usersDb = new MongoClient(getEnv("MONGODB_URI"))
     .db("auth")
     .collection("users");
 

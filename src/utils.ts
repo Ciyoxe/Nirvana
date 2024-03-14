@@ -14,3 +14,20 @@ export const errorToString = (error: any) => {
    
     return "Unknown server error";
 }
+
+
+const envCache = new Map<string, string>();
+setInterval(
+    () => envCache.clear(), 
+    10 * 60 * 1000
+);
+
+/** Cached access to environment variables, updates every 10 minutes */
+export const getEnv = (key: string)=> {
+    let env = envCache.get(key);
+    if (env === undefined) {
+        env = process.env[key] ?? "";
+        envCache.set(key, env);
+    }
+    return env;
+};
