@@ -1,12 +1,12 @@
 import "dotenv/config";
-import express from "express";
+import express, { ErrorRequestHandler } from "express";
 import auth_router from "./api/auth/router";
 import auth_midw   from "./api/auth/middleware";
+import { ErrorHanlder } from "./utils";
+
 
 
 express()
-
-.use(express.json({ limit : "10mb" }))
 
 .use("/auth", auth_router)
 
