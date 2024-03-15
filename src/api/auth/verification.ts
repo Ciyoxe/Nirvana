@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import {MongoClient, ObjectId } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 
 import { getEnv } from "../../utils";
 

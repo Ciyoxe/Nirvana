@@ -1,12 +1,13 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
 import z from "zod";
-import winston from "winston"
 
 import { authorize, register } from "./tokens";
 import { usernameExists } from "./verification";
-import { ErrorHanlder, errorToString, getEnv } from "../../utils";
+import { createFileLogger, errorToString, getEnv, ErrorHanlder } from "../../utils";
 
+
+const logger = createFileLogger("auth");
 
 const hardLimit = rateLimit({
     windowMs : 5000 * 60, // 5 min,
@@ -31,61 +32,78 @@ const authRequest = z.object({
 
 .use(express.json({ limit : "100kb" }))
 
-.post("/username-exists", softLimit, async (req, res) => {
-    const request = await usernameCheckRequest.parseAsync(req.body);
-    const exists  = await usernameExists(request.username);
-
-    res.json({ exists });
-})
-
-.post("/login", hardLimit, async (req, res) => {
-    const request = await authRequest.parseAsync(req.body);
-    const token   = await authorize(
-        request.username,
-        request.password,
-    );
-
-    if (!token) {
-        res.status(401).send("Wrong credentials");
-        return;
+.post("/username-exists", softLimit, async (req, res, next) => {
+    try {
+        const request = await usernameCheckRequest.parseAsync(req.body);
+        const exists  = await usernameExists(request.username);
+        
+        res.json({ exists });
+        
+        logger.info("Checked username: " + request.username);
     }
-
-    res.cookie("jwt", token, { 
-        expires  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
-        httpOnly : true, 
-        secure   : getEnv("NODE_ENV") === "production"
-    });
-    res.json({ success: true });
+    catch (err) { next(err) }
 })
 
-.post("/signup", hardLimit, async (req, res) => {
-    const request = await authRequest.parseAsync(req.body);
-    const token   = await register(
-        request.username,
-        request.password,
-    );
-
-    if (!token) {
-        res.status(401).send("Wrong credentials");
-        return;
+.post("/login", hardLimit, async (req, res, next) => {
+    try {
+        const request = await authRequest.parseAsync(req.body);
+        const token   = await authorize(
+            request.username,
+            request.password,
+        );
+        
+        if (!token) {
+            throw new Error("Wrong credentials");
+        }
+        
+        res.cookie("jwt", token, { 
+            expires  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
+            httpOnly : true, 
+            secure   : getEnv("NODE_ENV") === "production"
+        });
+        res.json({ success: true });
+        
+        logger.info("logging in: " + request.username);
     }
-
-    res.cookie("jwt", token, { 
-        expires  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
-        httpOnly : true, 
-        secure   : getEnv("NODE_ENV") === "production",
-    });
-    res.json({ success: true });
+    catch (err) { next(err) }
 })
 
-.post("/logout", hardLimit, (req, res) => {
-    res.clearCookie("jwt");
-    res.json({ success: true });
+.post("/signup", hardLimit, async (req, res, next) => {
+    try {
+        const request = await authRequest.parseAsync(req.body);
+        const token   = await register(
+            request.username,
+            request.password,
+        );
+        
+        if (!token) {
+            throw new Error("Wrong credentials");
+        }
+            
+        res.cookie("jwt", token, { 
+            expires  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
+            httpOnly : true, 
+            secure   : getEnv("NODE_ENV") === "production",
+        });
+        res.json({ success: true });
+
+        logger.info("signing up: " + request.username);
+    }
+    catch (err) { next(err) }
+})
+
+.post("/logout", hardLimit, (req, res, next) => {
+    try {
+        res.clearCookie("jwt");
+        res.json({ success: true });
+    }
+    catch (err) { next(err) }
 })
 
 .use(ErrorHanlder((err, req, res, next) => {
+    logger.info("Error: " + errorToString(err));
     res.status(400).send(errorToString(err));
-}))
+}));
 
 
 
