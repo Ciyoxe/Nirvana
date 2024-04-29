@@ -34,6 +34,9 @@ const authRequest = z.object({
 
 export default express.Router()
 
+// max request size: 2048 + 256 symbols, max 4 bytes per symbol + json structure ~ 10kb
+.use(express.json({ limit: "10kb" }))
+
 .post("/username-exists", softLimit, async (req, res, next) => {
     try {
         const request = await usernameCheckRequest.parseAsync(req.body);
