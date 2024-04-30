@@ -26,7 +26,7 @@ express()
     next();
 })
 
-.use("/auth", auth_router)
+.use("/api/auth", auth_router)
 
 .listen(3000, () => 
     console.log("Listening on port 3000")
