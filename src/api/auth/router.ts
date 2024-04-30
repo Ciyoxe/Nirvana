@@ -30,7 +30,8 @@ const authRequest = z.object({
 
  export default express.Router()
 
-.use(express.json({ limit : "100kb" }))
+// max request size: 2048 + 256 symbols, max 4 bytes per symbol + json structure ~ 10kb
+.use(express.json({ limit: "10kb" }))
 
 .post("/username-exists", softLimit, async (req, res, next) => {
     try {
@@ -53,7 +54,9 @@ const authRequest = z.object({
         );
         
         if (!token) {
-            throw new Error("Wrong credentials");
+            logger.warn("Wrong credentials (login): " + request.username);
+            res.status(401).json({ error: "Wrong credentials" });
+            return;
         }
         
         res.cookie("jwt", token, { 
@@ -77,7 +80,9 @@ const authRequest = z.object({
         );
         
         if (!token) {
-            throw new Error("Wrong credentials");
+            logger.warn("Wrong credentials (signup): " + request.username);
+            res.status(401).json({ error: "Wrong credentials" });
+            return;
         }
             
         res.cookie("jwt", token, { 

@@ -10,6 +10,8 @@ const logger = createFileLogger("requests", 100);
 
 express()
 
+.use(express.static("public"))
+
 .use((req, res, next) => {
     const contLen = parseInt(req.headers["content-length"] ?? '0');
     logger.http({
