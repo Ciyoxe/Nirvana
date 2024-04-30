@@ -1,5 +1,6 @@
 import "dotenv/config";
-import express from "express";
+import express      from "express";
+import cookieParser from "cookie-parser";
 
 import auth_router from "./api/auth/router";
 import auth_midw   from "./api/auth/middleware";
@@ -10,7 +11,9 @@ const logger = createFileLogger("requests", 100);
 
 express()
 
+
 .use(express.static("public"))
+.use(cookieParser())
 
 .use((req, res, next) => {
     const contLen = parseInt(req.headers["content-length"] ?? '0');
