@@ -62,7 +62,8 @@ const authRequest = z.object({
         res.cookie("jwt", token, { 
             expires  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
             httpOnly : true, 
-            secure   : getEnv("NODE_ENV") === "production"
+            sameSite : "strict",
+            secure   : getEnv("NODE_ENV") === "production",
         });
         res.json({ success: true });
         
@@ -88,6 +89,7 @@ const authRequest = z.object({
         res.cookie("jwt", token, { 
             expires  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
             httpOnly : true, 
+            sameSite : "strict",
             secure   : getEnv("NODE_ENV") === "production",
         });
         res.json({ success: true });
