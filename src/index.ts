@@ -21,7 +21,6 @@ express()
         ref : req.headers["referer"],
         met : req.method,
         url : req.url,
-        cnt : new String(req.body).slice(0, Math.min(contLen, 100)),
     });
     next();
 })
