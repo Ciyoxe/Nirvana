@@ -52,7 +52,8 @@ export default express.Router()
         const verified = await verifyUser(request.username, request.password);
 
         if (!verified) {
-            throw new Error("Wrong credentials");
+            res.status(401).json({ error: "Wrong credentials" });
+            return;
         }
 
         const token = signJwt(verified._id);
@@ -77,7 +78,6 @@ export default express.Router()
         }
         
         const user = await createUser(request.username, request.password);
-
         const token = signJwt(user.insertedId);
         
         res.cookie("jwt", token, { 
