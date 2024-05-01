@@ -79,12 +79,6 @@ const authRequest = z.object({
             request.username,
             request.password,
         );
-        
-        if (!token) {
-            logger.warn("Wrong credentials (signup): " + request.username);
-            res.status(401).json({ error: "Wrong credentials" });
-            return;
-        }
             
         res.cookie("jwt", token, { 
             expires  : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
