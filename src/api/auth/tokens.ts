@@ -1,23 +1,15 @@
-import jwt from "jsonwebtoken";
-
-import { verifyUser, createUser,usernameExists } from "./verification";
-import { getEnv } from "../../utils";
-
-
-const generateToken = (userId: string) =>
-    jwt.sign({ _id: userId }, getEnv("JWT_SECRET"), { expiresIn: "7d", algorithm: "HS384" });
-
+import { verifyUser, createUser, isNameExists, signJwt } from "./auth";
 
 export const register = async (username: string, password: string) => {
     if (username.length === 0 || password.length === 0) {
         throw new Error("Username and password required");
     }
-    if (await usernameExists(username)) {
+    if (await isNameExists(username)) {
         throw new Error("Username already exists");
     }
 
     const user  = await createUser(username, password);
-    const token = generateToken(user.insertedId.toHexString());
+    const token = signJwt(user.insertedId);
     
     return token;
 };
@@ -29,5 +21,5 @@ export const authorize = async (username: string, password: string) => {
     
     const user = await verifyUser(username, password);
     
-    return user ? generateToken(user._id.toHexString()) : null;
+    return user ? signJwt(user._id) : null;
 }

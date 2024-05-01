@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit";
 import z from "zod";
 
 import { authorize, register } from "./tokens";
-import { usernameExists } from "./verification";
+import { isNameExists } from "./auth";
 import { createFileLogger, errorToString, getEnv, ErrorHanlder } from "../../utils";
 
 
@@ -36,7 +36,7 @@ const authRequest = z.object({
 .post("/username-exists", softLimit, async (req, res, next) => {
     try {
         const request = await usernameCheckRequest.parseAsync(req.body);
-        const exists  = await usernameExists(request.username);
+        const exists  = await isNameExists(request.username);
         
         res.json({ exists });
         

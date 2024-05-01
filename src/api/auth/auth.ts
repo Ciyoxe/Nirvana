@@ -18,9 +18,9 @@ export async function isNameExists(username: string) {
     }
 }
 
-export async function isUserExists(userId: ObjectId) {
+export async function isUserExists(id: ObjectId) {
     try {
-        return await accounts.countDocuments({ _id: userId }, { limit: 1 }) > 0;
+        return await accounts.countDocuments({ _id: id }, { limit: 1 }) > 0;
     } catch (_) {
         return false;
     }

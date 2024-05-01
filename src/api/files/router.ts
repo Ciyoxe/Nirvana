@@ -30,7 +30,7 @@ export default express.Router()
 
 .use(authMiddleware)
 
-.post("/", uploader.single("file"), (req, res, next) => {
+.post("/", uploader.single("file"), (req, res) => {
     if (req.file) {
         logger.info("Uploaded file: " + req.file.originalname.substring(0, 256));
         res.json({ success: true, url: "/api/files/" + req.file.filename });
@@ -40,7 +40,7 @@ export default express.Router()
     }
 })
 
-.get("/:filename", (req, res, next) => {
+.get("/:filename", (req, res) => {
     if (!req.params.filename)
         res.status(400).json({ error: "No filename provided" });
     else 
