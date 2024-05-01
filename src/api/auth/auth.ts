@@ -33,7 +33,7 @@ export async function createUser(username: string, password: string) {
     const salt = crypto.randomBytes(32).toString("hex");
     const hash = (await generateHash(password, salt, 50_000, 64, "sha512")).toString("hex");
 
-    return accounts.insertOne({ name: username, hash, salt });
+    return accounts.insertOne({ name: username, hash, salt, profiles: [], activeProfile: null });
 }
 
 /** verify account credentials */

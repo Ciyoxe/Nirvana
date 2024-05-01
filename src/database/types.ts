@@ -1,10 +1,15 @@
 import { ObjectId } from "mongodb";
 
-/** user auth credentials */
 export type Account = {
+    /** user auth credentials */
     name : string,
     hash : string,
     salt : string,
+
+    /** profiles _id */
+    profiles      : ObjectId[],
+    /** profiles _id, null if user has no profiles */
+    activeProfile : ObjectId | null,
 }
 
 /** part of formatted text in post */
@@ -15,7 +20,7 @@ export type ContentPart = {
     data: {
         /** text content */
         text  : string,
-        /** text size multplier, 1 is default, should be in [0.5 .. 10] */
+        /** text size multplier, 1 is default, should be in [0.1 .. 10] */
         size  : number,
         /** color in hex form #RRGGBB */
         color : string,
@@ -58,16 +63,13 @@ export type Post = {
 }
 
 export type Profile = {
-    /** accounts _id */
-    account : ObjectId,
-
     role: "admin" | "user",
     /** displayed name */
     name: string,
     /** url to image file */
-    avatar: string,
+    avatar: string | null,
     /** url to image file */
-    banner: string,
+    banner: string | null,
 
     /** when profile was created */
     created: Date,
