@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 import util from "util";
 import crypto from "crypto";
-import passport from "passport";
-import { Strategy } from "passport-jwt";
 import { ObjectId } from "mongodb";
 
 import { accounts } from "../../database/collections";
@@ -53,24 +51,3 @@ export async function verifyUser(username: string, password: string) {
 export function signJwt(userId: ObjectId) {
     return jwt.sign({ id: userId.toHexString() }, getEnv("JWT_SECRET"), { expiresIn: "7d", algorithm: "HS384" });
 }
-
-passport.use(
-    new Strategy(
-        {
-            algorithms     : ["HS384", "HS512"],
-            secretOrKey    : getEnv("JWT_SECRET"),
-            jwtFromRequest : req => req.cookies?.jwt ?? null,
-        },
-        async (payload, done) => {
-            const userId = ObjectId.createFromHexString(payload.id);
-
-            if (await isUserExists(userId)) {
-                done(null, userId);
-            } else {
-                done(null, false);
-            }
-        }
-    )
-);
-
-export const authMiddleware = passport.authenticate("jwt", { session: false });
