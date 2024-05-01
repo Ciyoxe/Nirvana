@@ -42,7 +42,7 @@ export type Comment = {
     /** profiles _id */
     author  : ObjectId,
     /** comment id, if it's a reply to another comment */
-    parent? : ObjectId,
+    parent  : ObjectId | null,
 
     created : Date,
     text    : string,
@@ -61,6 +61,7 @@ export type Profile = {
     /** accounts _id */
     account : ObjectId,
 
+    role: "admin" | "user",
     /** displayed name */
     name: string,
     /** url to image file */
@@ -77,6 +78,9 @@ export type Profile = {
     following: ObjectId[],
     /** profiles _id */
     blocked: ObjectId[],
+
+    /** profile rating, from posts, comments and chats */
+    rating: number,
 }
 
 export type PersonalFeed = {
