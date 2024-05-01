@@ -5,11 +5,6 @@ export type Account = {
     name : string,
     hash : string,
     salt : string,
-
-    /** profiles _id */
-    profiles      : ObjectId[],
-    /** profiles _id, null if user has no profiles */
-    activeProfile : ObjectId | null,
 }
 
 /** part of formatted text in post */
@@ -64,6 +59,10 @@ export type Post = {
 }
 
 export type Profile = {
+    /** accounts _id */
+    account: ObjectId,
+    active : boolean,
+
     role: "admin" | "user",
     /** displayed name */
     name: string,
