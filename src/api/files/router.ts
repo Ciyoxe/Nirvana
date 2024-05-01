@@ -33,7 +33,7 @@ export default express.Router()
 .post("/", uploader.single("file"), (req, res, next) => {
     if (req.file) {
         logger.info("Uploaded file: " + req.file.originalname.substring(0, 256));
-        res.json({ success: true, filename: req.file.filename });
+        res.json({ success: true, url: "/api/files/" + req.file.filename });
     }
     else {
         res.status(400).json({ error: "No file uploaded" });
