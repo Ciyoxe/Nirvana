@@ -94,11 +94,8 @@ const authRequest = z.object({
 })
 
 .post("/logout", hardLimit, (req, res, next) => {
-    try {
-        res.clearCookie("jwt");
-        res.json({ success: true });
-    }
-    catch (err) { next(err) }
+    res.clearCookie("jwt");
+    res.json({ success: true });
 })
 
 .use(ErrorHanlder((err, req, res, next) => {
