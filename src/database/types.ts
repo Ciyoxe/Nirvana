@@ -28,7 +28,8 @@ export type ContentPart = {
         align : "left" | "center" | "right",
         style : "bold" | "italic" | "underline" | "strikethrough",
     } | {
-        url  : string,
+        /** image file name */
+        file : string,
         desc : string,
     },
 };
@@ -66,9 +67,9 @@ export type Profile = {
     role: "admin" | "user",
     /** displayed name */
     name: string,
-    /** url to image file */
+    /** image file name */
     avatar: string | null,
-    /** url to image file */
+    /** image file name */
     banner: string | null,
 
     /** when profile was created */

@@ -2,9 +2,11 @@ import "dotenv/config";
 import express      from "express";
 import cookieParser from "cookie-parser";
 
-import auth_router from "./api/auth/router";
-import auth_midw   from "./api/auth/middleware";
 import { createFileLogger } from "./utils";
+
+import authRouter from "./api/auth/router";
+import filesRouter from "./api/files/router";
+
 
 
 const logger = createFileLogger("requests", 100);
@@ -28,7 +30,10 @@ express()
     next();
 })
 
-.use("/api/auth", auth_router)
+.use("/api/auth", authRouter)
+
+.use("/api/files", filesRouter)
+
 
 .listen(3000, () => 
     console.log("Listening on port 3000")
