@@ -109,7 +109,7 @@ const authRequest = z.object({
 
 .use(ErrorHanlder((err, req, res, next) => {
     logger.info("Error: " + errorToString(err));
-    res.status(400).send(errorToString(err));
+    res.status(400).json({ error: errorToString(err) });
 }));
 
 
