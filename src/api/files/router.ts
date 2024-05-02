@@ -1,3 +1,4 @@
+import { rateLimit } from 'express-rate-limit';
 import { ErrorHanlder } from './../../utils';
 import { createFileLogger, errorToString } from "../../utils";
 
@@ -8,6 +9,15 @@ import path from "path";
 import crypto from "crypto";
 
 import authMiddleware from '../auth/middleware';
+
+const uploadLimit = rateLimit({
+    windowMs : 20000,
+    limit    : 10,
+});
+const downloadLimit = rateLimit({
+    windowMs : 1000,
+    limit    : 20,
+});
 
 const logger  = createFileLogger("files", 50);
 const storage = multer.diskStorage({
@@ -30,21 +40,26 @@ export default express.Router()
 
 .use(authMiddleware)
 
-.post("/", uploader.single("file"), (req, res) => {
-    if (req.file) {
+.post("/", uploadLimit, uploader.single("file"), (req, res, next) => {
+    try {
+        if (!req.file)
+            throw new Error("No file uploaded");
+
         logger.info("Uploaded file: " + req.file.originalname.substring(0, 256));
         res.json({ success: true, url: "/api/files/" + req.file.filename });
     }
-    else {
-        res.status(400).json({ error: "No file uploaded" });
-    }
+    catch (err) { next(err) }
 })
 
-.get("/:filename", (req, res) => {
-    if (!req.params.filename)
-        res.status(400).json({ error: "No filename provided" });
-    else 
+.get("/:filename", downloadLimit, (req, res, next) => {
+    try {
+        if (!req.params.filename)
+            throw new Error("No filename provided");
+
+        logger.info("Downloaded file: " + req.params.filename.substring(0, 256));
         res.sendFile(req.params.filename, { root: "uploads/" });
+    }
+    catch (err) { next(err) }
 })
 
 .use(ErrorHanlder((err, req, res, next)=>{
