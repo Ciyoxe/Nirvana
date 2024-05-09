@@ -9,11 +9,6 @@ import { block, createProfile, deleteProfile, getProfile, getProfileList, setAct
 
 
 const logger = createFileLogger("profiles");
-const limit  = rateLimit({
-    windowMs : 1000,
-    limit    : 5,
-})
-
 
 const createProfileRequest = z.object({
     name   : z.string().min(1).max(64),
@@ -33,9 +28,6 @@ const profileActionRequest = z.object({
 export default express.Router()
 
 // max request size: 512 + 256 symbols, max 4 bytes per symbol + json structure
-
-.use(limit)
-.use(authMiddleware)
 .use(express.json({ limit: "5kb" }))
 
 

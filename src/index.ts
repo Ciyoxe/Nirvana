@@ -4,11 +4,17 @@ import cookieParser from "cookie-parser";
 
 import { createFileLogger } from "./utils";
 
+import rateLimit from "express-rate-limit";
+import authMiddleware from "./api/auth/middleware";
+
 import authRouter from "./api/auth/router";
 import filesRouter from "./api/files/router";
+import profileRouter from "./api/profiles/router";
 
-
-
+const apiRateLimit = rateLimit({
+    limit    : 10,
+    windowMs : 1000,
+});
 const logger = createFileLogger("requests", 100);
 
 express()
@@ -32,7 +38,12 @@ express()
 
 .use("/api/auth", authRouter)
 
-.use("/api/files", filesRouter)
+.use(authMiddleware)
+// fils api uses auth, but has own limits
+.use("/api/file", filesRouter)
+
+.use(apiRateLimit)
+.use("/api/profile", profileRouter)
 
 
 .listen(3000, () => 

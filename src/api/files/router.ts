@@ -8,8 +8,6 @@ import multer  from "multer";
 import path from "path";
 import crypto from "crypto";
 
-import authMiddleware from '../auth/middleware';
-
 const uploadLimit = rateLimit({
     windowMs : 20000,
     limit    : 10,
@@ -37,8 +35,6 @@ const uploader = multer({
 })
 
 export default express.Router()
-
-.use(authMiddleware)
 
 .post("/", uploadLimit, uploader.single("file"), (req, res, next) => {
     try {
