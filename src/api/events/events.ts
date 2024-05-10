@@ -53,6 +53,9 @@ export async function consume(selfId: ObjectId, signal: AbortSignal) {
     // delay to prevent too many requests, if we have a lot of events, they will be sent all in one request
     await new Promise(resolve => setTimeout(resolve, 2000));
 
+    if (signal.aborted)
+        return [];
+
     const profile = await profiles.findOne({ account: selfId, active: true });
     if (!profile)
         throw new Error("Profile not found");
