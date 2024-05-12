@@ -24,15 +24,16 @@ export async function createProfile(selfId: ObjectId, name: string, avatar: stri
     const newProfile = await profiles.insertOne({
         name,
         avatar,
-        account   : selfId,
-        role      : "user",
-        banner    : null,
-        created   : new Date(),
-        online    : new Date(),
-        following : [],
-        blocked   : [],
-        rating    : 0,
-        active    : wasActive === null,
+        account      : selfId,
+        role         : "user",
+        banner       : null,
+        created      : new Date(),
+        online       : new Date(),
+        following    : [],
+        blockedChats : [],
+        blockedUsers : [],
+        rating       : 0,
+        active       : wasActive === null,
     });    
     return newProfile.insertedId;
 }
@@ -103,20 +104,20 @@ export async function unsubscribeAll(selfId: ObjectId) {
 
 export async function block(selfId: ObjectId, profileId: ObjectId) {
     await profiles.updateOne({ account: selfId, active: true }, {
-        $push: { blocked: profileId },
+        $push: { blockedUsers: profileId },
     });
     await unsubscribe(selfId, profileId);
 }
 
 export async function unblock(selfId: ObjectId, profileId: ObjectId) {
     await profiles.updateOne({ account: selfId, active: true }, {
-        $pull: { blocked: profileId },
+        $pull: { blockedUsers: profileId },
         $set : { online: new Date() }
     });
 }
 
 export async function unblockAll(selfId: ObjectId) {
     await profiles.updateOne({ account: selfId, active: true }, {
-        $set: { blocked: [], online: new Date() }
+        $set: { blockedUsers: [], online: new Date() }
     });
 }

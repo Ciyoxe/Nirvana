@@ -1,12 +1,16 @@
+import { conversations } from './../../database/collections';
 import { ObjectId } from "mongodb";
 import { profiles } from "../../database/collections";
 
 export type Event = {
-    type         : "message",
-    sender       : ObjectId,
-    conversation : ObjectId,
-    created      : Date,
-    text         : string,
+    type     : "message",
+    senderId : string,
+    chatId   : string,
+    created  : Date,
+    text     : string,
+} | {
+    type     : "anon-chat-enter" | "anon-chat-finished",
+    chatId   : string,
 };
 
 type ProfileEvents = {
@@ -14,7 +18,9 @@ type ProfileEvents = {
     lastRead : Date,
     updateCb : () => void,
 };
-const EventQueue = new Map<ObjectId, ProfileEvents>();
+
+// key - string repr of profile id
+const EventQueue = new Map<string, ProfileEvents>();
 
 setInterval(clearEvents, 1000 * 30);
 function clearEvents() {
@@ -36,14 +42,14 @@ export async function subscribe(selfId: ObjectId) {
     if (!profile)
         throw new Error("Profile not found");
 
-    EventQueue.set(selfId, {
+    EventQueue.set(selfId.toHexString(), {
         events   : [],
         lastRead : new Date(),
         updateCb : ()=> { }
     });
 }
 export function pushEvent(profileId: ObjectId, event: Event) {
-    const queue = EventQueue.get(profileId);
+    const queue = EventQueue.get(profileId.toHexString());
     if (queue) {
         queue.events.push(event);
         queue.updateCb();
@@ -60,7 +66,7 @@ export async function consume(selfId: ObjectId, signal: AbortSignal) {
     if (!profile)
         throw new Error("Profile not found");
 
-    const queue = EventQueue.get(selfId);
+    const queue = EventQueue.get(selfId.toHexString());
     if (!queue)
         throw new Error("You must to subscribe first");
 

@@ -78,8 +78,11 @@ export type Profile = {
 
     /** profiles _id */
     following: ObjectId[],
-    /** profiles _id */
-    blocked: ObjectId[],
+    
+    /** profiles _id, users, blocked in posts and comments sections */
+    blockedUsers: ObjectId[],
+    /** profiles _id, users, blocked in anon chats */
+    blockedChats: ObjectId[],
 
     /** profile rating, from posts, comments and chats */
     rating: number,
@@ -93,18 +96,19 @@ export type PersonalFeed = {
 }
 
 export type Conversation = {
+    name        : string,
+    type        : "personal" | "group" | "anonymous",
+    lastUpdate  : Date,
+    preview     : string | null,
     /** profiles _id */
     participants: ObjectId[],
-    /** messages _id */
-    messages    : ObjectId[],
 }
 
 export type Message = {
-    /** profiles _id */
-    sender      : ObjectId,
     /** conversations _id */
-    conversation: ObjectId,
-
+    chat   : ObjectId,
+    /** profiles _id */
+    sender : ObjectId,
     created: Date,
     text   : string,
 }
