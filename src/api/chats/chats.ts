@@ -9,7 +9,8 @@ export async function loadChats(selfId: ObjectId, count: number, offset: number)
     if (!profile)
         throw new Error("Profile not found");
 
-    const chats = await conversations.aggregate([
+    const allChats = await conversations.countDocuments({ participants: { $in: [profile._id] } });
+    const chats    = await conversations.aggregate([
         {
             $match: { participants: { $in: [profile._id] } },
         },
@@ -20,13 +21,16 @@ export async function loadChats(selfId: ObjectId, count: number, offset: number)
         { $limit: count },
     ]).toArray() as WithId<Conversation>[];
 
-    return chats.map(chat => ({
-        id      : chat._id,
-        type    : chat.type,
-        name    : chat.name,
-        preview : chat.preview,
-        lastDate: chat.lastUpdate,
-    }));
+    return {
+        count: allChats,
+        chats: chats.map(chat => ({
+            id      : chat._id,
+            type    : chat.type,
+            name    : chat.name,
+            preview : chat.preview,
+            lastDate: chat.lastUpdate,
+        }))
+    };
 }
 
 export async function loadMessages(selfId: ObjectId, conversation: ObjectId, count: number, offset: number) {
@@ -37,6 +41,7 @@ export async function loadMessages(selfId: ObjectId, conversation: ObjectId, cou
     if (!chat)
         throw new Error("Chat not found");
     
+    const allMessages = await messages.countDocuments({ chat: chat._id });
     const messageDocs = await messages.aggregate([
         {
             $match: { chat: chat._id }
@@ -48,12 +53,15 @@ export async function loadMessages(selfId: ObjectId, conversation: ObjectId, cou
         { $limit: count },
     ]).toArray() as WithId<Message>[];
 
-    return messageDocs.map(m => ({
-        id     : m._id,
-        text   : m.text,
-        sender : m.sender,
-        created: m.created,
-    }));
+    return {
+        count   : allMessages,
+        messages: messageDocs.map(m => ({
+            id     : m._id,
+            text   : m.text,
+            sender : m.sender,
+            created: m.created,
+        }))
+    }
 }
 
 export async function sendMessage(selfId: ObjectId, conversation: ObjectId, text: string) {

@@ -10,6 +10,7 @@ import authMiddleware from "./api/auth/middleware";
 import authRouter from "./api/auth/router";
 import filesRouter from "./api/files/router";
 import profileRouter from "./api/profiles/router";
+import chatsRouter from "./api/chats/router";
 
 const apiRateLimit = rateLimit({
     limit    : 10,
@@ -44,6 +45,7 @@ express()
 
 .use(apiRateLimit)
 .use("/api/profile", profileRouter)
+.use("/api/chat", chatsRouter)
 
 
 .listen(3000, () => 
