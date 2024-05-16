@@ -66,6 +66,8 @@ export type Profile = {
     role: "admin" | "user",
     /** displayed name */
     name: string,
+
+    about: string | null,
     /** image file url */
     avatar: string | null,
     /** image file url */
@@ -78,6 +80,7 @@ export type Profile = {
 
     /** profiles _id */
     following: ObjectId[],
+    followers: ObjectId[],
     
     /** profiles _id, users, blocked in posts and comments sections */
     blockedUsers: ObjectId[],

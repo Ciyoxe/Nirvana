@@ -11,7 +11,9 @@ export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
         throw new Error("Profile not found");
 
     return {
+        self       : selfProfile._id.equals(profileId),
         name       : profile.name,
+        about      : profile.about,
         avatar     : profile.avatar,
         banner     : profile.banner,
 
@@ -21,6 +23,7 @@ export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
         role       : profile.role,
         rating     : profile.rating,
         following  : profile.following.length,
+        followers  : profile.followers.length,
         isFollowing: selfProfile.following.find(id => id.equals(profileId)) !== undefined,
         isBlocked  : selfProfile.blockedUsers.find(id => id.equals(profileId)) !== undefined,
     }
@@ -32,6 +35,7 @@ export async function getSelfProfileInfo(selfId: ObjectId) {
         throw new Error("Profile not found");
     return {
         name: profile.name,
+        about: profile.about,
         avatar: profile.avatar,
         banner: profile.banner,
 
@@ -49,12 +53,14 @@ export async function createProfile(selfId: ObjectId, name: string, avatar: stri
     const newProfile = await profiles.insertOne({
         name,
         avatar,
+        about        : null,
         account      : selfId,
         role         : "user",
         banner       : null,
         created      : new Date(),
         online       : new Date(),
         following    : [],
+        followers    : [],
         blockedChats : [],
         blockedUsers : [],
         rating       : 0,
