@@ -1,22 +1,28 @@
 import { ObjectId } from "mongodb";
 import { profiles } from "../../database/collections";
 
-export async function getProfileInfo(profileId: ObjectId) {
+export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
+    const selfProfile = await profiles.findOne({ account: selfId, active: true });
+    if (!selfProfile)
+        throw new Error("Profile not found");
+
     const profile = await profiles.findOne({ _id: profileId });
     if (!profile)
         throw new Error("Profile not found");
 
     return {
-        name: profile.name,
-        avatar: profile.avatar,
-        banner: profile.banner,
+        name       : profile.name,
+        avatar     : profile.avatar,
+        banner     : profile.banner,
 
-        created: profile.created,
-        online: profile.online,
+        created    : profile.created,
+        online     : profile.online,
         
-        role     : profile.role,
-        rating   : profile.rating,
-        following: profile.following.length,
+        role       : profile.role,
+        rating     : profile.rating,
+        following  : profile.following.length,
+        isFollowing: selfProfile.following.find(id => id.equals(profileId)) !== undefined,
+        isBlocked  : selfProfile.blockedUsers.find(id => id.equals(profileId)) !== undefined,
     }
 }
 

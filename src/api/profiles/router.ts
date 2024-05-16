@@ -75,7 +75,7 @@ export default express.Router()
 .post("/get-info", async (req, res, next) => {
     try {
         const request = await profileActionRequest.parseAsync(req.body);
-        const profile = await getProfileInfo(new ObjectId(request.profileId));
+        const profile = await getProfileInfo(req.user as ObjectId, new ObjectId(request.profileId));
 
         res.json(profile);
 
