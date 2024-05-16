@@ -1,7 +1,26 @@
 import { ObjectId } from "mongodb";
 import { profiles } from "../../database/collections";
 
-export async function getProfile(selfId: ObjectId) {
+export async function getProfileInfo(profileId: ObjectId) {
+    const profile = await profiles.findOne({ _id: profileId });
+    if (!profile)
+        throw new Error("Profile not found");
+
+    return {
+        name: profile.name,
+        avatar: profile.avatar,
+        banner: profile.banner,
+
+        created: profile.created,
+        online: profile.online,
+        
+        role     : profile.role,
+        rating   : profile.rating,
+        following: profile.following.length,
+    }
+}
+
+export async function getSelfProfileInfo(selfId: ObjectId) {
     const profile = await profiles.findOne({ account: selfId, active: true });
     if (!profile)
         throw new Error("Profile not found");

@@ -5,7 +5,7 @@ import rateLimit from "express-rate-limit";
 import authMiddleware from "../auth/middleware";
 import { errorToString, createFileLogger, ErrorHanlder } from "../../utils";
 import { ObjectId } from "mongodb";
-import { block, createProfile, deleteProfile, getProfile, getProfileList, setActiveProfile, setAvatar, setBanner, subscribe, unblock, unblockAll, unsubscribe, unsubscribeAll } from "./profiles";
+import { block, createProfile, deleteProfile, getSelfProfileInfo, getProfileList, setActiveProfile, setAvatar, setBanner, subscribe, unblock, unblockAll, unsubscribe, unsubscribeAll, getProfileInfo } from "./profiles";
 
 
 const logger = createFileLogger("profiles");
@@ -33,7 +33,7 @@ export default express.Router()
 
 .get("/", async (req, res, next) => {
     try {
-        const profile = await getProfile(req.user as ObjectId);
+        const profile = await getSelfProfileInfo(req.user as ObjectId);
 
         res.json(profile);
 
@@ -69,6 +69,17 @@ export default express.Router()
         res.json(profiles);
 
         logger.info(`Get profile list: ${(req.user as ObjectId).toHexString()}`);
+    }
+    catch (err) { next(err) }
+})
+.post("/get-info", async (req, res, next) => {
+    try {
+        const request = await profileActionRequest.parseAsync(req.body);
+        const profile = await getProfileInfo(new ObjectId(request.profileId));
+
+        res.json(profile);
+
+        logger.info(`Get profile info: ${(req.user as ObjectId).toHexString()} ${request.profileId}`);
     }
     catch (err) { next(err) }
 })
