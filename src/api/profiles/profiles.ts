@@ -29,25 +29,6 @@ export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
     }
 }
 
-export async function getSelfProfileInfo(selfId: ObjectId) {
-    const profile = await profiles.findOne({ account: selfId, active: true });
-    if (!profile)
-        throw new Error("Profile not found");
-    return {
-        name: profile.name,
-        about: profile.about,
-        avatar: profile.avatar,
-        banner: profile.banner,
-
-        created: profile.created,
-        online: profile.online,
-        
-        role     : profile.role,
-        rating   : profile.rating,
-        following: profile.following.length,
-    }
-}
-
 export async function createProfile(selfId: ObjectId, name: string, avatar: string | null) {
     const wasActive  = await profiles.findOne({ _id: selfId, active: true });
     const newProfile = await profiles.insertOne({
