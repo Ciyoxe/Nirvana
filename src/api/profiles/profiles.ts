@@ -5,10 +5,39 @@ import { profiles } from "../../database/collections";
 // every hour all users get one rate
 setInterval(addRates, 1000 * 60 * 60);
 async function addRates() {
-    await profiles.updateMany({}, [
-        { $inc: { rates: 1 } },
-        { $min: { rates: 0 }, $max: { rates: 10 } },
-    ]);
+    await profiles.updateMany({}, {
+        $inc: { rates: 1 },
+        $min: { rates: 0 }, 
+        $max: { rates: 10 },
+    });
+}
+
+export async function rateUser(selfId: ObjectId, profileId: ObjectId, rating: "up" | "down") {
+    const profile = await profiles.findOne({ account: selfId, active: true });
+    if (!profile)
+        throw new Error("Profile not found");
+
+    if (profileId.equals(profileId))
+        throw new Error("You can't rate yourself");
+
+    const rateWeight = 0.2;
+    const normRating = (profile.rating + 10) / 20; // -10..10 -> 0..1
+    const rateFactor = Math.min(1, normRating * 2);
+    const rateSign   = rating === "up" ? 1 : -1;
+
+    if (profile.rates <= 0)
+        return;
+
+    await profiles.updateOne({ _id: profile._id }, {
+        $inc: { rates: -1 },
+        $min: { rates: 0 }, 
+        $max: { rates: 10 },
+    });
+    await profiles.updateOne({ _id: profileId }, { 
+        $inc: { rating: rateFactor * rateSign * rateWeight }, 
+        $min: { rating: -10 }, 
+        $max: { rating: 10 } 
+    });
 }
 
 export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
@@ -40,7 +69,7 @@ export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
 }
 
 export async function createProfile(selfId: ObjectId, name: string, avatar: string | null) {
-    const wasActive  = await profiles.findOne({ _id: selfId, active: true });
+    const wasActive  = await profiles.findOne({ account: selfId, active: true });
     const newProfile = await profiles.insertOne({
         name,
         avatar,

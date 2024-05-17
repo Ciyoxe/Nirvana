@@ -176,12 +176,19 @@ export async function rateUser(selfId: ObjectId, conversation: ObjectId, rating:
     if (chat.users.find(u => u.equals(profile._id)) === undefined)
         throw new Error("Chat not found");
 
-    const rate  = rating === "up" ? 0.1 : -0.1;
+    const rateWeight = 0.1;
+    const normRating = (profile.rating + 10) / 20; // -10..10 -> 0..1
+    const rateFactor = Math.min(1, normRating * 2);
+    const rateSign   = rating === "up" ? 1 : -1;
 
     for (const user of chat.users) {
         if (user.equals(profile._id))
             continue;
-        await profiles.updateOne({ _id: user }, { $inc: { rating: rate }, $min: { rating: 0 }, $max: { rating: 10 } });
+        await profiles.updateOne({ _id: user }, { 
+            $inc: { rating: rateFactor * rateSign * rateWeight }, 
+            $min: { rating: -10 }, 
+            $max: { rating: 10 } 
+        });
     }
 }
 

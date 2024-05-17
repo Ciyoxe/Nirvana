@@ -1,11 +1,9 @@
 import z         from "zod";
 import express   from "express";
-import rateLimit from "express-rate-limit";
 
-import authMiddleware from "../auth/middleware";
 import { errorToString, createFileLogger, ErrorHanlder } from "../../utils";
 import { ObjectId } from "mongodb";
-import { block, createProfile, deleteProfile, getProfileList, setActiveProfile, setAvatar, setBanner, subscribe, unblock, unblockAll, unsubscribe, unsubscribeAll, getProfileInfo } from "./profiles";
+import { block, rateUser, createProfile, deleteProfile, getProfileList, setActiveProfile, setAvatar, setBanner, subscribe, unblock, unblockAll, unsubscribe, unsubscribeAll, getProfileInfo } from "./profiles";
 
 
 const logger = createFileLogger("profiles");
@@ -23,7 +21,10 @@ const setBannerRequest = z.object({
 const profileActionRequest = z.object({
     profileId : z.string().min(1).max(32),
 });
-
+const rateRequest = z.object({
+    rating   : z.enum(["up", "down"]),
+    profileId: z.string().length(24),
+});
 
 export default express.Router()
 
@@ -170,6 +171,17 @@ export default express.Router()
         res.json({ success: true });
 
         logger.info(`Unblock all profiles: ${(req.user as ObjectId).toHexString()}`);
+    }
+    catch (err) { next(err) }
+})
+.post("/rate", async (req, res, next) => {
+    try {
+        const request = await rateRequest.parseAsync(req.body);
+        await rateUser(req.user as ObjectId, new ObjectId(request.profileId), request.rating);
+        
+        res.json({ success: true });
+
+        logger.info(`Rate profile: ${(req.user as ObjectId).toHexString()} ${request.profileId}`);
     }
     catch (err) { next(err) }
 })
