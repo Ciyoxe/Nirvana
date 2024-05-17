@@ -1,6 +1,16 @@
 import { ObjectId } from "mongodb";
 import { profiles } from "../../database/collections";
 
+
+// every hour all users get one rate
+setInterval(addRates, 1000 * 60 * 60);
+async function addRates() {
+    await profiles.updateMany({}, [
+        { $inc: { rates: 1 } },
+        { $min: { rates: 0 }, $max: { rates: 10 } },
+    ]);
+}
+
 export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
     const selfProfile = await profiles.findOne({ account: selfId, active: true });
     if (!selfProfile)
@@ -34,6 +44,7 @@ export async function createProfile(selfId: ObjectId, name: string, avatar: stri
     const newProfile = await profiles.insertOne({
         name,
         avatar,
+        rates        : 10,
         about        : null,
         account      : selfId,
         role         : "user",

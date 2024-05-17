@@ -62,6 +62,8 @@ export type Profile = {
     /** accounts _id */
     account: ObjectId,
     active : boolean,
+    /** remaining rates, one rate for one hour, 0..10 */
+    rates  : number,
 
     role: "admin" | "user",
     /** displayed name */
