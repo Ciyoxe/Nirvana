@@ -91,12 +91,9 @@ export async function createProfile(selfId: ObjectId, name: string, avatar: stri
 }
 
 export async function getProfileList(selfId: ObjectId) {
-    const list = (
-        await profiles.find({ account: selfId }, {
-            projection: { _id: 1 }
-        }
-    ).toArray());
-    return { profiles: list.map(profile => profile._id.toHexString()), active: list.find(p => p.active)?._id?.toHexString() ?? null };
+    return await profiles.find({ account: selfId }, {
+        projection: { _id: 1, active: 1, name: 1, avatar: 1 }
+    }).toArray();
 }
 
 export async function deleteProfile(selfId: ObjectId) {
