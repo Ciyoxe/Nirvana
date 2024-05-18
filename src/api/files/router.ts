@@ -19,7 +19,7 @@ const downloadLimit = rateLimit({
 
 const logger  = createFileLogger("files", 50);
 const storage = multer.diskStorage({
-    destination : (req, file, cb) => cb(null, "uploads/"),
+    destination : (req, file, cb) => cb(null, path.join(__dirname, "../../../uploads")),
     filename    : (req, file, cb) => {
         cb(null, crypto.randomBytes(32).toString("hex") + path.extname(file.originalname));
     },
@@ -29,7 +29,6 @@ const storage = multer.diskStorage({
 const uploader = multer({
     storage,
     limits: {
-        parts    : 1,
         fileSize : 10 * 1024 * 1024, // 10mb
     }
 })
@@ -55,7 +54,7 @@ export default express.Router()
 
         logger.info("Downloaded file: " + req.params.filename.substring(0, 256));
 
-        res.sendFile(req.params.filename, { root: "uploads/" });
+        res.sendFile(req.params.filename, { root: "uploads" });
     }
     catch (err) { next(err) }
 })

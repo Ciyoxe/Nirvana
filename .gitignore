@@ -6,3 +6,4 @@ package-lock.json
 logs
 *.log
 public
+uploads

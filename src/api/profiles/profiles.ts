@@ -136,15 +136,26 @@ export async function setName(selfId: ObjectId, name: string) {
 }
 
 export async function subscribe(selfId: ObjectId, profileId: ObjectId) {
-    await profiles.updateOne({ account: selfId, active: true }, {
-        $push: { following: profileId }
+    const profile = await profiles.findOneAndUpdate({ account: selfId, active: true}, {
+        $addToSet: { following: profileId }
+    });
+    if (!profile)
+        throw new Error("Profile not found");
+
+    await profiles.updateOne({ _id: profileId }, {
+        $addToSet: { followers: profile._id }
     });
 }
 
 export async function unsubscribe(selfId: ObjectId, profileId: ObjectId) {
-    await profiles.updateOne({ account: selfId, active: true }, {
-        $pull: { following: profileId },
-        $set : { online: new Date() }
+    const profile = await profiles.findOneAndUpdate({ account: selfId, active: true}, {
+        $pull: { following: profileId }
+    });
+    if (!profile)
+        throw new Error("Profile not found");
+
+    await profiles.updateOne({ _id: profileId }, {
+        $pull: { followers: profile._id }
     });
 }
 
@@ -156,7 +167,7 @@ export async function unsubscribeAll(selfId: ObjectId) {
 
 export async function block(selfId: ObjectId, profileId: ObjectId) {
     await profiles.updateOne({ account: selfId, active: true }, {
-        $push: { blockedUsers: profileId },
+        $addToSet: { blockedUsers: profileId },
     });
     await unsubscribe(selfId, profileId);
 }
@@ -164,7 +175,6 @@ export async function block(selfId: ObjectId, profileId: ObjectId) {
 export async function unblock(selfId: ObjectId, profileId: ObjectId) {
     await profiles.updateOne({ account: selfId, active: true }, {
         $pull: { blockedUsers: profileId },
-        $set : { online: new Date() }
     });
 }
 
