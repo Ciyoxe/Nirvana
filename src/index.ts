@@ -20,7 +20,6 @@ const logger = createFileLogger("requests", 100);
 
 express()
 
-
 .use(express.static("public"))
 .use(cookieParser())
 
@@ -47,6 +46,7 @@ express()
 .use("/api/profile", profileRouter)
 .use("/api/chat", chatsRouter)
 
+.use((req, res) => res.sendFile("index.html", { root: "public" }))
 
 .listen(3000, () => 
     console.log("Listening on port 3000")

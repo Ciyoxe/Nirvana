@@ -75,8 +75,9 @@ export default express.Router()
     catch (err) { next(err) }
 })
 
-.patch("/active", async (req, res, next) => {
+.post("/active", async (req, res, next) => {
     try {
+        console.log(">>>>>>>>> SET ACTIVE PROFILE");
         const request = await profileActionRequest.parseAsync(req.body);
         await setActiveProfile(req.user as ObjectId, new ObjectId(request.profileId));
         
@@ -86,7 +87,7 @@ export default express.Router()
     }
     catch (err) { next(err) }
 })
-.patch("/avatar", async (req, res, next) => {
+.post("/avatar", async (req, res, next) => {
     try {
         const request = await setAvatarRequest.parseAsync(req.body);
         await setAvatar(req.user as ObjectId, request.avatar);
@@ -97,7 +98,7 @@ export default express.Router()
     }
     catch (err) { next(err) }
 })
-.patch("/banner", async (req, res, next) => {
+.post("/banner", async (req, res, next) => {
     try {
         const request = await setBannerRequest.parseAsync(req.body);
         await setBanner(req.user as ObjectId, request.banner);

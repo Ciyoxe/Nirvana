@@ -100,10 +100,12 @@ export async function deleteProfile(selfId: ObjectId) {
     // TODO: delete all account related data
     await profiles.deleteOne({ account: selfId, active: true });
     // set new active account
-    const newActive = await profiles.updateOne({ account: selfId }, {
+    const newActive = await profiles.findOneAndUpdate({ account: selfId }, {
         $set: { active: true }
+    }, { 
+        projection: { _id: 1 } 
     });
-    return newActive.upsertedId;
+    return newActive?._id ?? null;
 }
 
 export async function setActiveProfile(selfId: ObjectId, profileId: ObjectId) {
