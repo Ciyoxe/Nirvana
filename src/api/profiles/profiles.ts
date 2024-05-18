@@ -100,9 +100,10 @@ export async function deleteProfile(selfId: ObjectId) {
     // TODO: delete all account related data
     await profiles.deleteOne({ account: selfId, active: true });
     // set new active account
-    await profiles.updateOne({ account: selfId }, {
+    const newActive = await profiles.updateOne({ account: selfId }, {
         $set: { active: true }
-    })
+    });
+    return newActive.upsertedId;
 }
 
 export async function setActiveProfile(selfId: ObjectId, profileId: ObjectId) {

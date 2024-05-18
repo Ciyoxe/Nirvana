@@ -45,9 +45,9 @@ export default express.Router()
 })
 .delete("/", async (req, res, next) => {
     try {
-        await deleteProfile(req.user as ObjectId);
+        const newActive = await deleteProfile(req.user as ObjectId);
         
-        res.json({ success: true });
+        res.json({ newActive });
 
         logger.info(`Delete profile: ${(req.user as ObjectId).toHexString()}`);
     } 
