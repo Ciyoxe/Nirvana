@@ -42,7 +42,8 @@ export default express.Router()
             throw new Error("No file uploaded");
 
         logger.info("Uploaded file: " + req.file.originalname.substring(0, 256));
-        res.json({ success: true, url: "/api/files/" + req.file.filename });
+
+        res.json({ url: "/api/file/" + req.file.filename });
     }
     catch (err) { next(err) }
 })
@@ -53,6 +54,7 @@ export default express.Router()
             throw new Error("No filename provided");
 
         logger.info("Downloaded file: " + req.params.filename.substring(0, 256));
+
         res.sendFile(req.params.filename, { root: "uploads/" });
     }
     catch (err) { next(err) }
