@@ -57,7 +57,7 @@ export default express.Router()
     try {
         const profiles = await getProfileList(req.user as ObjectId);
 
-        res.json(profiles);
+        res.json({ profiles });
 
         logger.info(`Get profile list: ${(req.user as ObjectId).toHexString()}`);
     }
