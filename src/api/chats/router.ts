@@ -11,17 +11,17 @@ import { blockUser, enterQueue, leaveChat, leaveQueue, rateUser } from "./anonCh
 const logger = createFileLogger("chats", 50);
 
 const sendMessageRequest = z.object({
-    conversationId : z.string().length(24),
-    text           : z.string().min(1).max(4096),
+    chatId : z.string().length(24),
+    text   : z.string().min(1).max(4096),
 });
 const loadChatsRequest = z.object({
     count  : z.number().min(1).max(100),
     offset : z.number().min(0),
 });
 const loadMessagesRequest = z.object({
-    conversationId : z.string().length(24),
-    count          : z.number().min(1).max(100),
-    offset         : z.number().min(0),
+    chatId : z.string().length(24),
+    count  : z.number().min(1).max(100),
+    offset : z.number().min(0),
 });
 const createChatRequest = z.object({
     profileId: z.string().length(24),
@@ -52,7 +52,7 @@ export default express.Router()
 .post("/send-message", async (req, res, next) => {
     try {
         const request = await sendMessageRequest.parseAsync(req.body);
-        const message = await sendMessage(req.user as ObjectId, ObjectId.createFromHexString(request.conversationId), request.text);
+        const message = await sendMessage(req.user as ObjectId, ObjectId.createFromHexString(request.chatId), request.text);
 
         res.json({ message });
     }
@@ -72,7 +72,7 @@ export default express.Router()
 .post("/load-messages", async (req, res, next) => {
     try {
         const request  = await loadMessagesRequest.parseAsync(req.body);
-        const messages = await loadMessages(req.user as ObjectId, ObjectId.createFromHexString(request.conversationId), request.count, request.offset);
+        const messages = await loadMessages(req.user as ObjectId, ObjectId.createFromHexString(request.chatId), request.count, request.offset);
 
         res.json(messages);
         
