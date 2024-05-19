@@ -87,8 +87,6 @@ export async function sendMessage(selfId: ObjectId, conversation: ObjectId, text
     });
 
     for (const participant of updated.participants) {
-        if (participant.equals(profile._id))
-            continue;
         pushEvent(participant, {
             id      : newMessage.insertedId.toHexString(),
             type    : 'message',
