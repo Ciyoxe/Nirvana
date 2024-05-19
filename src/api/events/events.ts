@@ -47,7 +47,7 @@ export async function subscribe(selfId: ObjectId) {
     if (!profile)
         throw new Error("Profile not found");
 
-    EventQueue.set(selfId.toHexString(), {
+    EventQueue.set(profile._id.toHexString(), {
         events   : [],
         lastRead : new Date(),
         updateCb : ()=> { }
@@ -71,7 +71,7 @@ export async function consume(selfId: ObjectId, signal: AbortSignal) {
     if (!profile)
         throw new Error("Profile not found");
 
-    const queue = EventQueue.get(selfId.toHexString());
+    const queue = EventQueue.get(profile._id.toHexString());
     if (!queue)
         throw new Error("You must to subscribe first");
 
