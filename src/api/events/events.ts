@@ -31,6 +31,10 @@ function clearEvents() {
         if (dateNow - queue.lastRead.getTime() > 5 * 60 * 1000) {
             deleteKeys.push(profileId);
         }
+        else
+        if (queue.events.length > 1000) {
+            queue.events.splice(0, queue.events.length - 1000);
+        }
     }
     for (const profileId of deleteKeys) {
         EventQueue.delete(profileId);
