@@ -19,7 +19,7 @@ export default express.Router()
     catch (err) { next(err) }
 })
 
-.get("/", async (req, res, next) => {
+.post("/consume", async (req, res, next) => {
     try {
         const controller = new AbortController();
         const abort      = () => controller.abort();
@@ -31,7 +31,6 @@ export default express.Router()
             controller.abort();
         }, 1000 * 60);
         
-
         res.json({
             events: await consume(req.user as ObjectId, controller.signal),
         });
