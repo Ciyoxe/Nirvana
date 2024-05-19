@@ -22,9 +22,15 @@ export default express.Router()
 .get("/", async (req, res, next) => {
     try {
         const controller = new AbortController();
-
-        req.once("close", controller.abort);
-        res.once("close", controller.abort);
+        const abort      = () => controller.abort();
+        res.once("close", abort);
+        req.once("close", abort);
+        setTimeout(()=> {
+            res.removeListener("close", abort);
+            req.removeListener("close", abort);
+            controller.abort();
+        }, 1000 * 60);
+        
 
         res.json({
             events: await consume(req.user as ObjectId, controller.signal),
