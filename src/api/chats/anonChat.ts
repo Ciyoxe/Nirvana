@@ -180,15 +180,31 @@ export async function rateUser(selfId: ObjectId, conversation: ObjectId, rating:
     const normRating = (profile.rating + 10) / 20; // -10..10 -> 0..1
     const rateFactor = Math.min(1, normRating * 2);
     const rateSign   = rating === "up" ? 1 : -1;
+    const rateBias   = rateWeight * rateFactor * rateSign;
 
+    await profiles.updateOne({ _id: profile._id }, [
+        {
+            $set: {
+                rates: {
+                    // clamp 0..10
+                    $min: [10, { $max: [0, { $add: [-1, "$rates"] }] }],
+                }
+            }
+        }
+    ]);
     for (const user of chat.users) {
         if (user.equals(profile._id))
             continue;
-        await profiles.updateOne({ _id: user }, { 
-            $inc: { rating: rateFactor * rateSign * rateWeight }, 
-            $min: { rating: -10 }, 
-            $max: { rating: 10 } 
-        });
+        await profiles.updateOne({ _id: user }, [
+            {
+                $set: {
+                    rating: {
+                        // clamp -10..10
+                        $min: [10, { $max: [-10, { $add: [rateBias, "$rating"] }] }],
+                    }
+                }
+            }
+        ]);
     }
 }
 

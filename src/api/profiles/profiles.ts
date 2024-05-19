@@ -5,12 +5,18 @@ import { profiles } from "../../database/collections";
 // every hour all users get one rate
 setInterval(addRates, 1000 * 60 * 60);
 async function addRates() {
-    await profiles.updateMany({}, {
-        $inc: { rates: 1 },
-        $min: { rates: 0 }, 
-        $max: { rates: 10 },
-    });
+    await profiles.updateMany({}, [
+        {
+            $set: {
+                rates: {
+                    // clamp 0..10
+                    $min: [10, { $max: [0, { $add: [1, "$rates"] }] }],
+                }
+            }
+        }
+    ]);
 }
+addRates();
 
 export async function rateUser(selfId: ObjectId, profileId: ObjectId, rating: "up" | "down") {
     const profile = await profiles.findOne({ account: selfId, active: true });
@@ -24,20 +30,31 @@ export async function rateUser(selfId: ObjectId, profileId: ObjectId, rating: "u
     const normRating = (profile.rating + 10) / 20; // -10..10 -> 0..1
     const rateFactor = Math.min(1, normRating * 2);
     const rateSign   = rating === "up" ? 1 : -1;
+    const rateBias   = rateWeight * rateFactor * rateSign;
 
     if (profile.rates <= 0)
         return;
 
-    await profiles.updateOne({ _id: profile._id }, {
-        $inc: { rates: -1 },
-        $min: { rates: 0 }, 
-        $max: { rates: 10 },
-    });
-    await profiles.updateOne({ _id: profileId }, { 
-        $inc: { rating: rateFactor * rateSign * rateWeight }, 
-        $min: { rating: -10 }, 
-        $max: { rating: 10 } 
-    });
+    await profiles.updateOne({ _id: profile._id }, [
+        {
+            $set: {
+                rates: {
+                    // clamp 0..10
+                    $min: [10, { $max: [0, { $add: [-1, "$rates"] }] }],
+                }
+            }
+        }
+    ]);
+    await profiles.updateOne({ _id: profileId }, [
+        {
+            $set: {
+                rating: {
+                    // clamp -10..10
+                    $min: [10, { $max: [-10, { $add: [rateBias, "$rating"] }] }],
+                }
+            }
+        }
+    ]);
 }
 
 export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
