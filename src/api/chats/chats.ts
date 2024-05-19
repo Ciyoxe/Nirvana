@@ -90,6 +90,7 @@ export async function sendMessage(selfId: ObjectId, conversation: ObjectId, text
         if (participant.equals(profile._id))
             continue;
         pushEvent(participant, {
+            id      : newMessage.insertedId.toHexString(),
             type    : 'message',
             senderId: profile._id.toHexString(),
             chatId  : conversation.toHexString(),

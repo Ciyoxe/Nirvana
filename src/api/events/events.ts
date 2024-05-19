@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { profiles } from "../../database/collections";
 
 export type Event = {
+    id       : string,
     type     : "message",
     senderId : string,
     chatId   : string,
