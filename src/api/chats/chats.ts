@@ -15,7 +15,7 @@ export async function loadChats(selfId: ObjectId, count: number, offset: number)
             $match: { participants: { $in: [profile._id] } },
         },
         {
-            $sort: {lastUpdate: -1}
+            $sort: {lastUpdate: 1}
         },
         { $skip: offset },
         { $limit: count },
@@ -47,7 +47,7 @@ export async function loadMessages(selfId: ObjectId, conversation: ObjectId, cou
             $match: { chat: chat._id }
         },
         {
-            $sort: { created: -1 }
+            $sort: { created: 1 }
         },
         { $skip: offset },
         { $limit: count },
