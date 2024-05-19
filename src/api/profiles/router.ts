@@ -10,7 +10,7 @@ const logger = createFileLogger("profiles");
 
 const createProfileRequest = z.object({
     name   : z.string().min(1).max(64),
-    avatar : z.string().min(1).max(512).nullable().optional(),
+    avatar : z.string().max(4096).nullable().optional(),
 });
 const setAvatarRequest = z.object({
     avatar : z.string().min(1).max(512).nullable(),
