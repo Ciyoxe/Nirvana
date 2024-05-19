@@ -13,7 +13,7 @@ export async function getPersonalChat(selfId: ObjectId, profileId: ObjectId) {
     if (!receiverProfile)
         throw new Error("Receiver profile not found");
 
-    const chat = await conversations.findOneAndDelete(
+    const chat = await conversations.findOne(
         { type: "personal", participants: { $in: [selfProfile._id, receiverProfile._id] } },
         { projection: { _id: 1 } }
     );
