@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { conversations, messages, profiles } from "../../database/collections";
 
-export async function createPersonalChat(selfId: ObjectId, profileId: ObjectId) {
+export async function getPersonalChat(selfId: ObjectId, profileId: ObjectId) {
     const [selfProfile, receiverProfile] = await Promise.all([
         profiles.findOne({ account: selfId, active: true }),
         profiles.findOne({ _id: profileId }, { projection: { name: 1 } })
@@ -13,8 +13,15 @@ export async function createPersonalChat(selfId: ObjectId, profileId: ObjectId) 
     if (!receiverProfile)
         throw new Error("Receiver profile not found");
 
+    const chat = await conversations.findOneAndDelete(
+        { type: "personal", participants: { $in: [selfProfile._id, receiverProfile._id] } },
+        { projection: { _id: 1 } }
+    );
+    if (chat)
+        return chat._id;
+
     const newChat = await conversations.insertOne({
-        name        : receiverProfile.name,
+        name        : selfProfile.name + " - " + receiverProfile.name,
         type        : "personal",
         participants: [selfProfile._id,  receiverProfile._id],
         lastUpdate  : new Date(),

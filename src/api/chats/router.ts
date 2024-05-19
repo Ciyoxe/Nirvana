@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 import { ErrorHanlder, createFileLogger, errorToString } from "../../utils";
 
 import { loadChats, loadMessages, sendMessage } from "./chats";
-import { createPersonalChat, deletePersonalChat } from "./personalChat";
+import { getPersonalChat, deletePersonalChat } from "./personalChat";
 import { blockUser, enterQueue, leaveChat, leaveQueue, rateUser } from "./anonChat";
 
 const logger = createFileLogger("chats", 50);
@@ -84,7 +84,7 @@ export default express.Router()
 .post("/personal", async (req, res, next) => {
     try {
         const request = await createChatRequest.parseAsync(req.body);
-        const chatId  = await createPersonalChat(req.user as ObjectId, ObjectId.createFromHexString(request.profileId));
+        const chatId  = await getPersonalChat(req.user as ObjectId, ObjectId.createFromHexString(request.profileId));
 
         res.json({ chatId: chatId.toHexString() });
 
