@@ -11,6 +11,7 @@ import authRouter from "./api/auth/router";
 import filesRouter from "./api/files/router";
 import profileRouter from "./api/profiles/router";
 import chatsRouter from "./api/chats/router";
+import eventsRouter from "./api/events/router";
 
 const apiRateLimit = rateLimit({
     limit    : 10,
@@ -45,6 +46,7 @@ express()
 .use(apiRateLimit)
 .use("/api/profile", profileRouter)
 .use("/api/chat", chatsRouter)
+.use("/api/event", eventsRouter)
 
 .use((req, res) => res.sendFile("index.html", { root: "public" }))
 
