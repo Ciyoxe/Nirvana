@@ -58,7 +58,7 @@ export async function loadMessages(selfId: ObjectId, conversation: ObjectId, cou
         messages: messageDocs.map(m => ({
             id     : m._id,
             text   : m.text,
-            sender : m.sender,
+            sender : (chat.type === "anonymous" && !m.sender.equals(profile._id)) ? null : m.sender.toHexString(),
             created: m.created,
         }))
     }
@@ -69,13 +69,13 @@ export async function sendMessage(selfId: ObjectId, conversation: ObjectId, text
     if (!profile)
         throw new Error("Profile not found");
 
-    const updated = await conversations.findOneAndUpdate({ _id: conversation, participants: { $in: [profile._id] } }, {
+    const chat = await conversations.findOneAndUpdate({ _id: conversation, participants: { $in: [profile._id] } }, {
         $set:  { 
             lastUpdate: new Date(),
             preview   : text.substring(0, 256),
         },
     });
-    if (!updated)
+    if (!chat)
         throw new Error("Wrong chat id");
 
     const created = new Date();
@@ -86,11 +86,11 @@ export async function sendMessage(selfId: ObjectId, conversation: ObjectId, text
         text,
     });
 
-    for (const participant of updated.participants) {
+    for (const participant of chat.participants) {
         pushEvent(participant, {
             id      : newMessage.insertedId.toHexString(),
             type    : 'message',
-            senderId: profile._id.toHexString(),
+            senderId: (chat.type === "anonymous" && !participant.equals(profile._id)) ? null : profile._id.toHexString(),
             chatId  : conversation.toHexString(),
             created,
             text,

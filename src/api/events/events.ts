@@ -5,7 +5,7 @@ import { profiles } from "../../database/collections";
 export type Event = {
     id       : string,
     type     : "message",
-    senderId : string,
+    senderId : string | null,
     chatId   : string,
     created  : Date,
     text     : string,
