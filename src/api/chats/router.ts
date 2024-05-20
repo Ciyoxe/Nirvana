@@ -36,8 +36,8 @@ const enterAnonChatRequest = z.object({
         gender    : z.enum(["m", "f"]).nullable(),
         minAge    : z.number().min(0).max(100).nullable(),
         maxAge    : z.number().min(0).max(100).nullable(),
-        minRating : z.number().min(0).max(10).nullable(),
-        maxRating : z.number().min(0).max(10).nullable(),
+        minRating : z.number().min(-10).max(10).nullable(),
+        maxRating : z.number().min(-10).max(10).nullable(),
     })
 });
 const rateAnonChatRequest = z.object({
