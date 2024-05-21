@@ -1,5 +1,5 @@
 import express from "express";
-import { consume, subscribe } from "./events";
+import { SSE, getProfileId } from "./events";
 import { ObjectId } from "mongodb";
 import { ErrorHanlder, createFileLogger, errorToString } from "../../utils";
 
@@ -8,32 +8,24 @@ const logger = createFileLogger("events", 50);
 
 export default express.Router()
 
-.post("/subscribe", async (req, res, next) => {
+.get("/", async (req, res, next) => {
     try {
-        await subscribe(req.user as ObjectId);
-
-        res.json({ success: true });
-
-        logger.info(`Subscribed: ${(req.user as ObjectId).toHexString()}`);
-    }
-    catch (err) { next(err) }
-})
-
-.post("/consume", async (req, res, next) => {
-    try {
-        const controller = new AbortController();
-        const abort      = () => controller.abort();
-        res.once("close", abort);
-        req.once("close", abort);
-        setTimeout(()=> {
-            res.removeListener("close", abort);
-            req.removeListener("close", abort);
-            controller.abort();
-        }, 1000 * 60);
-        
-        res.json({
-            events: await consume(req.user as ObjectId, controller.signal),
+        res.writeHead(200, {
+            'Content-Type'  : 'text/event-stream',
+            'Connection'    : 'keep-alive',
+            'Cache-Control' : 'no-cache'
         });
+        const profileId = await getProfileId(req.user as ObjectId);
+
+        const hanlder = (event: any)=> {
+            res.write(`data: ${JSON.stringify(event)}\n\n`);
+        };
+
+        SSE.on(profileId, hanlder);
+
+        req.on("close", ()=> SSE.off(profileId, hanlder));
+
+        logger.info(`Get events: ${(req.user as ObjectId).toHexString()}`);
     }
     catch (err) { next(err) }
 })

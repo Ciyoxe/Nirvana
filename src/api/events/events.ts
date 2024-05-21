@@ -20,75 +20,51 @@ type ProfileEvents = {
     updateCb : () => void,
 };
 
-// key - string repr of profile id
-const EventQueue = new Map<string, ProfileEvents>();
+export const SSE = {
+    _handlers: new Map<string, ((event: Event) => void)[]>(),
 
-setInterval(clearEvents, 1000 * 30);
-function clearEvents() {
-    const dateNow    = new Date().getTime();
-    const deleteKeys = [];
-
-    for (const [profileId, queue] of EventQueue) {
-        if (dateNow - queue.lastRead.getTime() > 5 * 60 * 1000) {
-            deleteKeys.push(profileId);
+    on(profileId: string, handler: (event: Event) => void) {
+        if (!this._handlers.has(profileId))
+            this._handlers.set(profileId, []);
+        this._handlers.get(profileId)!.push(handler);
+    },
+    off(profileId: string, handler: (event: Event) => void) {
+        const handlers = this._handlers.get(profileId);
+        if (handlers) {
+            const index = handlers.indexOf(handler);
+            if (index !== -1)
+                handlers.splice(index, 1);
         }
-        else
-        if (queue.events.length > 1000) {
-            queue.events.splice(0, queue.events.length - 1000);
+    },
+    emit(profileId: string, event: Event) {
+        const handlers = this._handlers.get(profileId);
+        if (handlers) {
+            for (const handler of handlers) {
+                handler(event);
+            }
         }
     }
-    for (const profileId of deleteKeys) {
-        EventQueue.delete(profileId);
-    }
-}
+};
 
-export async function subscribe(selfId: ObjectId) {
-    const profile = await profiles.findOne({ account: selfId, active: true });
+export async function getProfileId(selfId: ObjectId) {
+    const profile = await profiles.findOne({ account: selfId, active: true }, { projection: { _id: 1 } });
     if (!profile)
         throw new Error("Profile not found");
-
-    EventQueue.set(profile._id.toHexString(), {
-        events   : [],
-        lastRead : new Date(),
-        updateCb : ()=> { }
-    });
+    return profile._id.toHexString();
 }
+
 export function pushEvent(profileId: ObjectId, event: Event) {
-    const queue = EventQueue.get(profileId.toHexString());
-    if (queue) {
-        queue.events.push(event);
-        queue.updateCb();
-    }
-}
-export async function consume(selfId: ObjectId, signal: AbortSignal) {
-    // delay to prevent too many requests, if we have a lot of events, they will be sent all in one request
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    if (signal.aborted)
-        return [];
-
-    const profile = await profiles.findOne({ account: selfId, active: true });
-    if (!profile)
-        throw new Error("Profile not found");
-
-    const queue = EventQueue.get(profile._id.toHexString());
-    if (!queue)
-        throw new Error("You must to subscribe first");
-
-    queue.lastRead = new Date();
-
-    // if we have no events now - wait for next event
-    if (queue.events.length === 0) {
-        const { promise, resolve } = Promise.withResolvers<void>();
-
-        // there is no point to wait if we have aborted
-        signal.onabort = ()=> resolve();
-        queue.updateCb = resolve;
-        await promise;
-    }
-    if (signal.aborted) {
-        return [];
-    }
-    return queue.events.splice(0, queue.events.length);
+    SSE.emit(profileId.toString(), event);
 }
 
+setInterval(()=> {
+    const deteled = [] as string[];
+
+    for (const [id, handlers] of SSE._handlers) {
+        if (handlers.length === 0)
+            deteled.push(id);
+    }
+    for (const id of deteled) {
+        SSE._handlers.delete(id);
+    }
+}, 1000 * 60 * 5);
