@@ -49,6 +49,8 @@ export type Post = {
     created : Date,
     content : ContentPart[],
     rating  : number,
+    /** is post visible in public feed */
+    public  : boolean,
 }
 
 export type Profile = {
