@@ -29,13 +29,6 @@ export type ContentPart = {
     },
 };
 
-/** user vote for comment or post */
-export type Vote = {
-    /** profiles _id */
-    author : ObjectId,
-    vote   : "up" | "down",
-}
-
 /** comment for post */
 export type Comment = {
     /** posts _id */
@@ -47,7 +40,7 @@ export type Comment = {
 
     created : Date,
     text    : string,
-    votes   : Vote[],
+    rating  : number,
 }
 
 export type Post = {
@@ -55,7 +48,7 @@ export type Post = {
     author  : ObjectId,
     created : Date,
     content : ContentPart[],
-    votes   : Vote[],
+    rating  : number,
 }
 
 export type Profile = {
@@ -118,6 +111,8 @@ export type Message = {
     text   : string,
 }
 
+
+/** currently not used */
 export type Notification = {
     /** profiles _id */
     profile: ObjectId,
