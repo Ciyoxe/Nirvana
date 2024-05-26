@@ -14,12 +14,6 @@ export type Event = {
     chatId   : string,
 };
 
-type ProfileEvents = {
-    events   : Event[],
-    lastRead : Date,
-    updateCb : () => void,
-};
-
 export const SSE = {
     _handlers: new Map<string, ((event: Event) => void)[]>(),
 
