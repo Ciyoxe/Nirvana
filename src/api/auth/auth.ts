@@ -12,7 +12,7 @@ const generateHash = util.promisify(crypto.pbkdf2);
 
 export async function isNameExists(username: string) {
     try {
-        return await accounts.countDocuments({ name: username }, { limit: 1 }) > 0;
+        return await accounts.findOne({ name: username }) !== null;
     } catch (_) {
         return false;
     }
@@ -20,7 +20,7 @@ export async function isNameExists(username: string) {
 
 export async function isUserExists(id: ObjectId) {
     try {
-        return await accounts.countDocuments({ _id: id }, { limit: 1 }) > 0;
+        return await accounts.findOne({ _id: id }) !== null;
     } catch (_) {
         return false;
     }
