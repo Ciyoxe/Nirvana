@@ -130,25 +130,25 @@ export async function setActiveProfile(selfId: ObjectId, profileId: ObjectId) {
         $set: { active: false }
     });
     await profiles.updateOne({ _id: profileId, account: selfId }, {
-        $set: { active: true, online: new Date() }
+        $set: { active: true }
     });
 }
 
 export async function setAvatar(selfId: ObjectId, avatar: string | null) {
     await profiles.updateOne({ account: selfId, active: true }, {
-        $set: { avatar, online: new Date() }
+        $set: { avatar }
     });
 }
 
 export async function setBanner(selfId: ObjectId, banner: string | null) {
     await profiles.updateOne({ account: selfId, active: true }, {
-        $set: { banner, online: new Date() }
+        $set: { banner }
     });
 }
 
 export async function setName(selfId: ObjectId, name: string) {
     await profiles.updateOne({ account: selfId, active: true }, {
-        $set: { name, online: new Date() }
+        $set: { name }
     });
 }
 
@@ -178,7 +178,7 @@ export async function unsubscribe(selfId: ObjectId, profileId: ObjectId) {
 
 export async function unsubscribeAll(selfId: ObjectId) {
     await profiles.updateOne({ account: selfId, active: true }, {
-        $set: { following: [], online: new Date() }
+        $set: { following: [] }
     });
 }
 
@@ -197,6 +197,6 @@ export async function unblock(selfId: ObjectId, profileId: ObjectId) {
 
 export async function unblockAll(selfId: ObjectId) {
     await profiles.updateOne({ account: selfId, active: true }, {
-        $set: { blockedUsers: [], online: new Date() }
+        $set: { blockedUsers: [] }
     });
 }

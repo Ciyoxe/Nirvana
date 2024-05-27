@@ -15,25 +15,34 @@ export type Event = {
 };
 
 export const SSE = {
-    _handlers: new Map<string, ((event: Event) => void)[]>(),
+    _handlers   : new Map<string, { handlers: ((event: Event) => void)[], updater: NodeJS.Timeout }>(),
 
     on(profileId: string, handler: (event: Event) => void) {
         if (!this._handlers.has(profileId))
-            this._handlers.set(profileId, []);
-        this._handlers.get(profileId)!.push(handler);
+            this._handlers.set(profileId, {
+                handlers: [],
+                updater : setInterval(()=> profiles.updateOne({ _id: new ObjectId(profileId) }, {
+                    $set: { online: new Date() }
+                }), 1000 * 60 * 10)
+            });
+        this._handlers.get(profileId)!.handlers.push(handler);
     },
     off(profileId: string, handler: (event: Event) => void) {
-        const handlers = this._handlers.get(profileId);
-        if (handlers) {
-            const index = handlers.indexOf(handler);
+        const eventData = this._handlers.get(profileId);
+        if (eventData) {
+            const index = eventData.handlers.indexOf(handler);
             if (index !== -1)
-                handlers.splice(index, 1);
+                eventData.handlers.splice(index, 1);
+            if (eventData.handlers.length === 0) {
+                clearInterval(eventData.updater);
+                this._handlers.delete(profileId);
+            }
         }
     },
     emit(profileId: string, event: Event) {
-        const handlers = this._handlers.get(profileId);
-        if (handlers) {
-            for (const handler of handlers) {
+        const eventData = this._handlers.get(profileId);
+        if (eventData) {
+            for (const handler of eventData.handlers) {
                 handler(event);
             }
         }
@@ -50,15 +59,3 @@ export async function getProfileId(selfId: ObjectId) {
 export function pushEvent(profileId: ObjectId, event: Event) {
     SSE.emit(profileId.toString(), event);
 }
-
-setInterval(()=> {
-    const deteled = [] as string[];
-
-    for (const [id, handlers] of SSE._handlers) {
-        if (handlers.length === 0)
-            deteled.push(id);
-    }
-    for (const id of deteled) {
-        SSE._handlers.delete(id);
-    }
-}, 1000 * 60 * 5);
