@@ -9,24 +9,20 @@ export type Account = {
 
 /** part of formatted text in post */
 export type ContentPart = {
-    type: "text" | "image",
+    type  : "text",
+    /** text content */
+    text  : string,
+    /** text size multplier, 1 is default, should be in [0.1 .. 10] */
+    size  : number,
+    /** color in hex form #RRGGBB or default color */
+    color : string | null,
 
-    /** text or image according to type */
-    data: {
-        /** text content */
-        text  : string,
-        /** text size multplier, 1 is default, should be in [0.1 .. 10] */
-        size  : number,
-        /** color in hex form #RRGGBB */
-        color : string,
-
-        align : "left" | "center" | "right",
-        style : "bold" | "italic" | "underline" | "strikethrough",
-    } | {
-        /** image file url */
-        file : string,
-        desc : string,
-    },
+    align : "left" | "center" | "right",
+    style : "normal" | "bold" | "italic" | "underline" | "strikethrough",
+} | {
+    type : "image",
+    file : string,
+    desc : string,
 };
 
 /** comment for post */
@@ -47,6 +43,8 @@ export type Post = {
     /** profiles _id */
     author  : ObjectId,
     created : Date,
+    header  : string,
+    about   : string | null,
     content : ContentPart[],
     rating  : number,
     /** is post visible in public feed */

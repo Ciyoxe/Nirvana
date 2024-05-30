@@ -12,6 +12,7 @@ import filesRouter from "./api/files/router";
 import profileRouter from "./api/profiles/router";
 import chatsRouter from "./api/chats/router";
 import eventsRouter from "./api/events/router";
+import postsRouter from "./api/posts/router";
 
 const apiRateLimit = rateLimit({
     limit    : 10,
@@ -39,14 +40,12 @@ express()
 
 .use("/api/auth", authRouter)
 
-.use(authMiddleware)
-// fils api uses auth, but has own limits
-.use("/api/file", filesRouter)
+.use("/api/file", authMiddleware, filesRouter)
 
-.use(apiRateLimit)
-.use("/api/profile", profileRouter)
-.use("/api/chat", chatsRouter)
-.use("/api/event", eventsRouter)
+.use("/api/profile", authMiddleware, apiRateLimit, profileRouter)
+.use("/api/chat", authMiddleware, apiRateLimit, chatsRouter)
+.use("/api/event", authMiddleware, apiRateLimit, eventsRouter)
+.use("/api/post", authMiddleware, apiRateLimit, postsRouter)
 
 .use((req, res) => res.sendFile("index.html", { root: "public" }))
 

@@ -77,7 +77,6 @@ export default express.Router()
 
 .post("/active", async (req, res, next) => {
     try {
-        console.log(">>>>>>>>> SET ACTIVE PROFILE");
         const request = await profileActionRequest.parseAsync(req.body);
         await setActiveProfile(req.user as ObjectId, new ObjectId(request.profileId));
         
