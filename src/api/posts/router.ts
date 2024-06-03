@@ -70,6 +70,10 @@ export default express.Router()
         const id   = req.params.id;
         const post = await getPost(req.user as ObjectId, id);
 
+        res.set({
+            "Cache-Control": "public, max-age=1000, s-maxage=1000",
+            "Expires"      : new Date(Date.now() + 1000 * 1000).toUTCString(),
+        });
         res.json(post);
 
         logger.info(`Get post: ${(req.user as ObjectId).toHexString()}, ${id}`);

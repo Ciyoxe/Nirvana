@@ -54,6 +54,10 @@ export default express.Router()
 
         logger.info("Downloaded file: " + req.params.filename.substring(0, 256));
 
+        res.set({
+            "Cache-Control": "public, max-age=3600, s-maxage=3600",
+            "Expires"      : new Date(Date.now() + 3600 * 1000).toUTCString(),
+        });
         res.sendFile(req.params.filename, { root: "uploads" });
     }
     catch (err) { next(err) }

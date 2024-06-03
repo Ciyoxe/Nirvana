@@ -31,7 +31,20 @@ export default express.Router()
 // max request size: 512 + 256 symbols, max 4 bytes per symbol + json structure
 .use(express.json({ limit: "5kb" }))
 
+.get("/:id", async (req, res, next) => {
+    try {
+        const profile = await getProfileInfo(req.user as ObjectId, new ObjectId(req.params.id));
 
+        res.set({
+            "Cache-Control": "public, max-age=300, s-maxage=300",
+            "Expires"      : new Date(Date.now() + 300 * 1000).toUTCString(),
+        });
+        res.json(profile);
+
+        logger.info(`Get profile info: ${(req.user as ObjectId).toHexString()} ${req.params.id}`);
+    }
+    catch (err) { next(err) }
+})
 .post("/", async (req, res, next) => {
     try {
         const request = await createProfileRequest.parseAsync(req.body);
@@ -63,18 +76,6 @@ export default express.Router()
     }
     catch (err) { next(err) }
 })
-.post("/get-info", async (req, res, next) => {
-    try {
-        const request = await profileActionRequest.parseAsync(req.body);
-        const profile = await getProfileInfo(req.user as ObjectId, new ObjectId(request.profileId));
-
-        res.json(profile);
-
-        logger.info(`Get profile info: ${(req.user as ObjectId).toHexString()} ${request.profileId}`);
-    }
-    catch (err) { next(err) }
-})
-
 .post("/active", async (req, res, next) => {
     try {
         const request = await profileActionRequest.parseAsync(req.body);
@@ -108,7 +109,6 @@ export default express.Router()
     }
     catch (err) { next(err) }
 })
-
 .post("/subscribe", async (req, res, next) => {
     try {
         const request = await profileActionRequest.parseAsync(req.body);
@@ -141,7 +141,6 @@ export default express.Router()
     }
     catch (err) { next(err) }
 })
-
 .post("/block", async (req, res, next) => {
     try {
         const request = await profileActionRequest.parseAsync(req.body);
