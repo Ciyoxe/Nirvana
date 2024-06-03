@@ -62,7 +62,7 @@ export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
     if (!selfProfile)
         throw new Error("Profile not found");
 
-    const profile = await profiles.findOne({ _id: profileId });
+    const profile = profileId.equals(selfId) ? selfProfile : await profiles.findOne({ _id: profileId });
     if (!profile)
         throw new Error("Profile not found");
 
