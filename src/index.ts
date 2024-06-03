@@ -13,6 +13,7 @@ import profileRouter from "./api/profiles/router";
 import chatsRouter from "./api/chats/router";
 import eventsRouter from "./api/events/router";
 import postsRouter from "./api/posts/router";
+import commentsRouter from "./api/comments/router";
 
 const apiRateLimit = rateLimit({
     limit    : 10,
@@ -46,6 +47,7 @@ express()
 .use("/api/chat", authMiddleware, apiRateLimit, chatsRouter)
 .use("/api/event", authMiddleware, apiRateLimit, eventsRouter)
 .use("/api/post", authMiddleware, apiRateLimit, postsRouter)
+.use("/api/comment", authMiddleware, apiRateLimit, commentsRouter)
 
 .use((req, res) => res.sendFile("index.html", { root: "public" }))
 
