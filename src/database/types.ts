@@ -32,7 +32,7 @@ export type Comment = {
     /** profiles _id */
     author  : ObjectId,
     /** comment id, if it's a reply to another comment */
-    parent  : ObjectId | null,
+    replyTo : ObjectId | null,
 
     created : Date,
     text    : string,
