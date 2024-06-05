@@ -115,6 +115,8 @@ export async function getProfileList(selfId: ObjectId) {
 
 export async function deleteProfile(selfId: ObjectId, profileId: ObjectId) {
     // TODO: delete all account related data
+    await unsubscribeAll(selfId);
+
     const deleted = await profiles.deleteOne({ account: selfId, _id: profileId });
     if (deleted.deletedCount === 0)
         throw new Error("Profile not found");
@@ -168,6 +170,8 @@ export async function subscribe(selfId: ObjectId, profileId: ObjectId) {
 export async function unsubscribe(selfId: ObjectId, profileId: ObjectId) {
     const profile = await profiles.findOneAndUpdate({ account: selfId, active: true}, {
         $pull: { following: profileId }
+    }, {
+        projection: { _id: 1 }
     });
     if (!profile)
         throw new Error("Profile not found");
@@ -178,8 +182,16 @@ export async function unsubscribe(selfId: ObjectId, profileId: ObjectId) {
 }
 
 export async function unsubscribeAll(selfId: ObjectId) {
-    await profiles.updateOne({ account: selfId, active: true }, {
+    const profile = await profiles.findOneAndUpdate({ account: selfId, active: true }, {
         $set: { following: [] }
+    }, {
+        projection: { _id: 1, followers: 1 }
+    });
+    if (!profile)
+        throw new Error("Profile not found");
+
+    await profiles.updateMany({ _id: { $in: profile.followers } }, {
+        $pull: { followers: profile._id }
     });
 }
 
