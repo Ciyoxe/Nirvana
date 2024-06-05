@@ -113,16 +113,17 @@ export async function getProfileList(selfId: ObjectId) {
     }).toArray();
 }
 
-export async function deleteProfile(selfId: ObjectId) {
+export async function deleteProfile(selfId: ObjectId, profileId: ObjectId) {
     // TODO: delete all account related data
-    await profiles.deleteOne({ account: selfId, active: true });
-    // set new active account
-    const newActive = await profiles.findOneAndUpdate({ account: selfId }, {
-        $set: { active: true }
-    }, { 
-        projection: { _id: 1 } 
-    });
-    return newActive?._id ?? null;
+    const deleted = await profiles.deleteOne({ account: selfId, _id: profileId });
+    if (deleted.deletedCount === 0)
+        throw new Error("Profile not found");
+
+    const activeAccount = 
+        await profiles.findOne({ account: selfId, active: true }, { projection: { _id: 1 } }) ??
+        await profiles.findOneAndUpdate({ account: selfId }, { $set: { active: true } }, { projection: { _id: 1 } });
+    
+    return activeAccount?._id ?? null;
 }
 
 export async function setActiveProfile(selfId: ObjectId, profileId: ObjectId) {
