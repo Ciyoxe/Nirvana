@@ -86,8 +86,8 @@ export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
 }
 
 export async function createProfile(selfId: ObjectId, name: string, avatar: string | null) {
-    const wasActive  = await profiles.findOne({ account: selfId, active: true });
-    const newProfile = await profiles.insertOne({
+    const currentProfile = await profiles.findOne({ account: selfId, active: true }, { projection: { _id: 1 } });
+    const newProfile     = await profiles.insertOne({
         name,
         avatar,
         rates        : 10,
@@ -102,7 +102,7 @@ export async function createProfile(selfId: ObjectId, name: string, avatar: stri
         blockedChats : [],
         blockedUsers : [],
         rating       : 0,
-        active       : wasActive === null,
+        active       : currentProfile === null,
     });    
     return newProfile.insertedId;
 }
@@ -132,39 +132,56 @@ export async function setActiveProfile(selfId: ObjectId, profileId: ObjectId) {
     await profiles.updateOne({ account: selfId, active: true }, {
         $set: { active: false }
     });
-    await profiles.updateOne({ _id: profileId, account: selfId }, {
+    const updated = await profiles.updateOne({ _id: profileId, account: selfId }, {
         $set: { active: true }
     });
+    if (updated.modifiedCount === 0)
+        throw new Error("Profile not found");
 }
 
 export async function setAvatar(selfId: ObjectId, avatar: string | null) {
-    await profiles.updateOne({ account: selfId, active: true }, {
+    const updated = await profiles.updateOne({ account: selfId, active: true }, {
         $set: { avatar }
     });
+    if (updated.modifiedCount === 0)
+        throw new Error("Profile not found")
 }
 
 export async function setBanner(selfId: ObjectId, banner: string | null) {
-    await profiles.updateOne({ account: selfId, active: true }, {
+    const updated = await profiles.updateOne({ account: selfId, active: true }, {
         $set: { banner }
     });
+    if (updated.modifiedCount === 0)
+        throw new Error("Profile not found")
 }
 
 export async function setName(selfId: ObjectId, name: string) {
-    await profiles.updateOne({ account: selfId, active: true }, {
+    const updated = await profiles.updateOne({ account: selfId, active: true }, {
         $set: { name }
     });
+    if (updated.modifiedCount === 0)
+        throw new Error("Profile not found")
 }
 
 export async function subscribe(selfId: ObjectId, profileId: ObjectId) {
-    const profile = await profiles.findOneAndUpdate({ account: selfId, active: true}, {
+    const profile = await profiles.findOneAndUpdate({ account: selfId, active: true }, {
         $addToSet: { following: profileId }
+    }, {
+        projection: { _id: 1 }
     });
     if (!profile)
         throw new Error("Profile not found");
 
-    await profiles.updateOne({ _id: profileId }, {
+    const updated = await profiles.updateOne({ _id: profileId }, {
         $addToSet: { followers: profile._id }
     });
+    if (updated.modifiedCount === 0) {
+        // rollback
+        await profiles.updateOne({ _id: profile._id }, {
+            $pull: { following: profileId }
+        })
+        throw new Error("Subscription profile not found");
+    }
 }
 
 export async function unsubscribe(selfId: ObjectId, profileId: ObjectId) {
