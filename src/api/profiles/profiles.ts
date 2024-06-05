@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { profiles } from "../../database/collections";
+import { Profile } from "../../database/types";
 
 
 // every hour all users get one rate
@@ -140,20 +141,12 @@ export async function setActiveProfile(selfId: ObjectId, profileId: ObjectId) {
         throw new Error("Profile not found");
 }
 
-export async function setAvatar(selfId: ObjectId, avatar: string | null) {
-    const updated = await profiles.updateOne({ account: selfId, active: true }, {
-        $set: { avatar }
+export async function updateProfile(selfId: ObjectId, profileId: ObjectId, fields: Partial<Profile>) {
+    const updated = await profiles.updateOne({ _id: profileId, account: selfId }, {
+        $set: fields
     });
     if (updated.modifiedCount === 0)
-        throw new Error("Profile not found")
-}
-
-export async function setBanner(selfId: ObjectId, banner: string | null) {
-    const updated = await profiles.updateOne({ account: selfId, active: true }, {
-        $set: { banner }
-    });
-    if (updated.modifiedCount === 0)
-        throw new Error("Profile not found")
+        throw new Error("Profile not found");
 }
 
 export async function setName(selfId: ObjectId, name: string) {

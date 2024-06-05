@@ -3,7 +3,7 @@ import express   from "express";
 
 import { errorToString, createFileLogger, ErrorHanlder } from "../../utils";
 import { ObjectId } from "mongodb";
-import { block, rateUser, createProfile, deleteProfile, getProfileList, setActiveProfile, setAvatar, setBanner, subscribe, unblock, unblockAll, unsubscribe, unsubscribeAll, getProfileInfo } from "./profiles";
+import { block, rateUser, createProfile, deleteProfile, getProfileList, setActiveProfile, subscribe, unblock, unblockAll, unsubscribe, unsubscribeAll, getProfileInfo, updateProfile } from "./profiles";
 
 
 const logger = createFileLogger("profiles");
@@ -12,12 +12,6 @@ const createProfileRequest = z.object({
     name   : z.string().min(1).max(64),
     avatar : z.string().max(4096).nullable().optional(),
 });
-const setAvatarRequest = z.object({
-    avatar : z.string().min(1).max(512).nullable(),
-});
-const setBannerRequest = z.object({
-    banner : z.string().min(1).max(512).nullable(),
-});
 const profileActionRequest = z.object({
     profileId : z.string().min(1).max(32),
 });
@@ -25,6 +19,12 @@ const rateRequest = z.object({
     rating   : z.enum(["up", "down"]),
     profileId: z.string().length(24),
 });
+const updateRequest = z.object({
+    name   : z.string().min(1).max(64).optional(),
+    about  : z.string().max(4096).nullable().optional(),
+    avatar : z.string().max(4096).nullable().optional(),
+    banner : z.string().max(4096).nullable().optional(),
+})
 
 export default express.Router()
 
@@ -66,6 +66,17 @@ export default express.Router()
     } 
     catch (err) { next(err) }
 })
+.patch("/:id", async (req, res, next) => {
+    try {
+        const request = await updateRequest.parseAsync(req.body);
+        await updateProfile(req.user as ObjectId, new ObjectId(req.params.id), request);
+
+        res.json({ success: true });
+
+        logger.info(`Update profile: ${(req.user as ObjectId).toHexString()} ${req.params.id}`);
+    }
+    catch (err) { next(err) }
+})
 .get("/list", async (req, res, next) => {
     try {
         const profiles = await getProfileList(req.user as ObjectId);
@@ -84,28 +95,6 @@ export default express.Router()
         res.json({ success: true });
 
         logger.info(`Set active profile: ${(req.user as ObjectId).toHexString()} ${request.profileId}`);
-    }
-    catch (err) { next(err) }
-})
-.post("/set-avatar", async (req, res, next) => {
-    try {
-        const request = await setAvatarRequest.parseAsync(req.body);
-        await setAvatar(req.user as ObjectId, request.avatar);
-
-        res.json({ success: true });
-
-        logger.info(`Set avatar: ${(req.user as ObjectId).toHexString()}`);
-    }
-    catch (err) { next(err) }
-})
-.post("/set-banner", async (req, res, next) => {
-    try {
-        const request = await setBannerRequest.parseAsync(req.body);
-        await setBanner(req.user as ObjectId, request.banner);
-
-        res.json({ success: true });
-
-        logger.info(`Set banner: ${(req.user as ObjectId).toHexString()}`);
     }
     catch (err) { next(err) }
 })
