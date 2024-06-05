@@ -110,9 +110,9 @@ export async function createProfile(selfId: ObjectId, name: string, avatar: stri
 
 export async function getProfileList(selfId: ObjectId) {
     return await profiles.find({ account: selfId }, {
-        projection: { _id: 1, active: 1, name: 1, avatar: 1 }
+        projection: { _id: 1, active: 1, name: 1, avatar: 1, about: 1, rating: 1 },
     })
-    .toArray() as { _id: ObjectId, active: boolean, name: string, avatar: string | null }[];
+    .toArray() as { _id: ObjectId, active: boolean, name: string, avatar: string | null, about: string | null, rating: number }[];
 }
 
 export async function deleteProfile(selfId: ObjectId, profileId: ObjectId) {
