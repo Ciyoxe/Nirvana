@@ -51,10 +51,10 @@ export default express.Router()
 
 .post("/send-message", async (req, res, next) => {
     try {
-        const request = await sendMessageRequest.parseAsync(req.body);
-        const message = await sendMessage(req.user as ObjectId, ObjectId.createFromHexString(request.chatId), request.text);
+        const request   = await sendMessageRequest.parseAsync(req.body);
+        const messageId = await sendMessage(req.user as ObjectId, ObjectId.createFromHexString(request.chatId), request.text);
 
-        res.json({ message });
+        res.json({ messageId });
     }
     catch (err) { next(err) }
 })
@@ -92,10 +92,9 @@ export default express.Router()
     }
     catch (err) { next(err) }
 })
-.delete("/personal", async (req, res, next) => {
+.delete("/personal/:id", async (req, res, next) => {
     try {
-        const request = await chatActionRequest.parseAsync(req.body);
-        await deletePersonalChat(req.user as ObjectId, ObjectId.createFromHexString(request.chatId));
+        await deletePersonalChat(req.user as ObjectId, new ObjectId(req.params.id));
 
         res.json({ success: true });
 
@@ -139,7 +138,7 @@ export default express.Router()
     catch (err) { next(err) }
 })
 
-.post("/anonymous/rate", async (req, res, next) => {
+.post("/anonymous/rate-user", async (req, res, next) => {
     try {
         const request = await rateAnonChatRequest.parseAsync(req.body);
         await rateUser(req.user as ObjectId, ObjectId.createFromHexString(request.chatId), request.rate);
@@ -151,7 +150,7 @@ export default express.Router()
     catch (err) { next(err) }
 })
 
-.post("/anonymous/block", async (req, res, next) => {
+.post("/anonymous/block-user", async (req, res, next) => {
     try {
         const request = await chatActionRequest.parseAsync(req.body);
         await blockUser(req.user as ObjectId, ObjectId.createFromHexString(request.chatId));
