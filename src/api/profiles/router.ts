@@ -10,7 +10,9 @@ const logger = createFileLogger("profiles");
 
 const createProfileRequest = z.object({
     name   : z.string().min(1).max(64),
+    about  : z.string().max(4096).nullable().optional(),
     avatar : z.string().max(4096).nullable().optional(),
+    banner : z.string().max(4096).nullable().optional(),
 });
 const profileActionRequest = z.object({
     profileId : z.string().min(1).max(32),
@@ -48,7 +50,13 @@ export default express.Router()
 .post("/", async (req, res, next) => {
     try {
         const request = await createProfileRequest.parseAsync(req.body);
-        const profile = await createProfile(req.user as ObjectId, request.name, request.avatar ?? null);
+        const profile = await createProfile(
+            req.user as ObjectId, 
+            request.name, 
+            request.avatar ?? null,
+            request.about  ?? null,
+            request.banner ?? null
+        );
 
         res.json({ profileId: profile });
 

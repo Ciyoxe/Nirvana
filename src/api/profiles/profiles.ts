@@ -86,16 +86,22 @@ export async function getProfileInfo(selfId: ObjectId, profileId: ObjectId) {
     }
 }
 
-export async function createProfile(selfId: ObjectId, name: string, avatar: string | null) {
+export async function createProfile(
+    selfId : ObjectId, 
+    name   : string, 
+    avatar : string | null, 
+    about  : string | null,
+    banner : string | null
+) {
     const currentProfile = await profiles.findOne({ account: selfId, active: true }, { projection: { _id: 1 } });
     const newProfile     = await profiles.insertOne({
         name,
         avatar,
-        rates        : 10,
-        about        : null,
+        about,
+        banner,
+        rates        : 1,
         account      : selfId,
         role         : "user",
-        banner       : null,
         created      : new Date(),
         online       : new Date(),
         following    : [],
