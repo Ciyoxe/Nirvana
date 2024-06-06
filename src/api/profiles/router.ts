@@ -85,7 +85,7 @@ export default express.Router()
     }
     catch (err) { next(err) }
 })
-.get("/list", async (req, res, next) => {
+.post("/get-list", async (req, res, next) => {
     try {
         const profiles = await getProfileList(req.user as ObjectId);
 
