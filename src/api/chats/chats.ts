@@ -51,7 +51,23 @@ export async function loadMessages(selfId: ObjectId, conversation: ObjectId, cou
         },
         { $skip: offset },
         { $limit: count },
-    ]).toArray() as WithId<Message>[];
+        {
+            $lookup: {
+                from         : "profiles",
+                localField   : "sender",
+                foreignField : "_id",
+                as           : "senderProfile"
+            }
+        },
+        {
+            $unwind: "$senderProfile"
+        },
+        {
+            $addFields: {
+                senderName: "$senderProfile.name"
+            }
+        },
+    ]).toArray() as WithId<Message & { senderName: string }>[];
 
     return {
         count   : allMessages,
@@ -59,6 +75,7 @@ export async function loadMessages(selfId: ObjectId, conversation: ObjectId, cou
             id     : m._id,
             text   : m.text,
             sender : (chat.type === "anonymous" && !m.sender.equals(profile._id)) ? null : m.sender.toHexString(),
+            senderName: (chat.type === "anonymous" && !m.sender.equals(profile._id)) ? "Собеседник" : m.senderName,
             created: m.created,
         }))
     }
