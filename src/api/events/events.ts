@@ -3,15 +3,16 @@ import { ObjectId } from "mongodb";
 import { profiles } from "../../database/collections";
 
 export type Event = {
-    id       : string,
-    type     : "message",
-    senderId : string | null,
-    chatId   : string,
-    created  : Date,
-    text     : string,
+    id         : string,
+    type       : "message",
+    senderId   : string | null,
+    senderName : string,
+    chatId     : string,
+    created    : Date,
+    text       : string,
 } | {
-    type     : "anon-chat-enter" | "anon-chat-finished",
-    chatId   : string,
+    type       : "anon-chat-enter" | "anon-chat-finished",
+    chatId     : string,
 };
 
 export const SSE = {

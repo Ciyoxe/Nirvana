@@ -105,10 +105,11 @@ export async function sendMessage(selfId: ObjectId, conversation: ObjectId, text
 
     for (const participant of chat.participants) {
         pushEvent(participant, {
-            id      : newMessage.insertedId.toHexString(),
-            type    : 'message',
-            senderId: (chat.type === "anonymous" && !participant.equals(profile._id)) ? null : profile._id.toHexString(),
-            chatId  : conversation.toHexString(),
+            id         : newMessage.insertedId.toHexString(),
+            type       : 'message',
+            senderId   : (chat.type === "anonymous" && !participant.equals(profile._id)) ? null : profile._id.toHexString(),
+            senderName : (chat.type === "anonymous" && !participant.equals(profile._id)) ? "Собеседник" : profile.name,
+            chatId     : conversation.toHexString(),
             created,
             text,
         });
