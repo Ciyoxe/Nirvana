@@ -153,7 +153,7 @@ export async function leaveChat(selfId: ObjectId, conversation: ObjectId) {
     for (const user of deleted.participants) {
         if (user.equals(profile._id))
             continue;
-        pushEvent(profile._id, {
+        pushEvent(user, {
             type  : "anon-chat-finished",
             chatId: conversation.toHexString()
         });
