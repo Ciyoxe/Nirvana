@@ -37,10 +37,6 @@ export default express.Router()
     try {
         const profile = await getProfileInfo(req.user as ObjectId, new ObjectId(req.params.id));
 
-        res.set({
-            "Cache-Control": "public, max-age=300, s-maxage=300",
-            "Expires"      : new Date(Date.now() + 300 * 1000).toUTCString(),
-        });
         res.json(profile);
 
         logger.info(`Get profile info: ${(req.user as ObjectId).toHexString()} ${req.params.id}`);
