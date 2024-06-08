@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 import { posts, profiles } from "../../database/collections";
 import { ContentPart } from "../../database/types";
 
@@ -96,7 +96,23 @@ export async function loadPosts(selfId: ObjectId, req: LoadPostsReq) {
                             rating : 1,
                             created: 1,
                         }
-                    }
+                    },
+                    {
+                        $lookup: {
+                            from         : "profiles",
+                            localField   : "author",
+                            foreignField : "_id",
+                            as           : "authorProfile"
+                        }
+                    },
+                    {
+                        $unwind: "$authorProfile"
+                    },
+                    {
+                        $addFields: {
+                            authorName: "$authorProfile.name"
+                        }
+                    },
                 ]
             }
         }
@@ -111,12 +127,13 @@ export async function loadPosts(selfId: ObjectId, req: LoadPostsReq) {
     return {
         count: (result.count[0]?.count ?? 0) as number,
         posts: (result.posts as any[]).map((post: any) => ({
-            id     : post._id.toHexString()     as string,
-            author : post.author.toHexString()  as string,
-            header : post.header                as string,
-            about  : post.about                 as string | null,
-            created: post.created               as Date,
-            rating : post.rating                as number,
+            id         : post._id.toHexString()     as string,
+            author     : post.author.toHexString()  as string,
+            header     : post.header                as string,
+            about      : post.about                 as string | null,
+            created    : post.created               as Date,
+            rating     : post.rating                as number,
+            authorName : post.authorProfile.name as string
         })),
     };
 }
@@ -126,11 +143,33 @@ export async function getPost(selfId: ObjectId, postId: string) {
     if (!profile)
         throw new Error("Profile not found");
 
-    const post = await posts.findOne({ _id: new ObjectId(postId) });
+    const post = await posts.findOne([
+        {
+            $match: {
+                _id: new ObjectId(postId),
+            }
+        },
+        {
+            $lookup: {
+                from         : "profiles",
+                localField   : "author",
+                foreignField : "_id",
+                as           : "authorProfile"
+            }
+        },
+        {
+            $unwind: "$authorProfile"
+        },
+        {
+            $addFields: {
+                authorName: "$authorProfile.name"
+            }
+        },
+    ]);
     if (!post)
         throw new Error("Post not found");
 
-    return post;
+    return post as WithId<Post & { authorName: string }>;
 }
 
 export async function deletePost(selfId: ObjectId, postId: string) {
