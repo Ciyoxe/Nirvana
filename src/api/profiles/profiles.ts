@@ -143,7 +143,7 @@ export async function setActiveProfile(selfId: ObjectId, profileId: ObjectId) {
     const updated = await profiles.updateOne({ _id: profileId, account: selfId }, {
         $set: { active: true }
     });
-    if (updated.modifiedCount === 0)
+    if (updated.matchedCount === 0)
         throw new Error("Profile not found");
 }
 
@@ -151,7 +151,7 @@ export async function updateProfile(selfId: ObjectId, profileId: ObjectId, field
     const updated = await profiles.updateOne({ _id: profileId, account: selfId }, {
         $set: fields
     });
-    if (updated.modifiedCount === 0)
+    if (updated.matchedCount === 0)
         throw new Error("Profile not found");
 }
 
@@ -159,7 +159,7 @@ export async function setName(selfId: ObjectId, name: string) {
     const updated = await profiles.updateOne({ account: selfId, active: true }, {
         $set: { name }
     });
-    if (updated.modifiedCount === 0)
+    if (updated.matchedCount === 0)
         throw new Error("Profile not found")
 }
 
@@ -175,7 +175,7 @@ export async function subscribe(selfId: ObjectId, profileId: ObjectId) {
     const updated = await profiles.updateOne({ _id: profileId }, {
         $addToSet: { followers: profile._id }
     });
-    if (updated.modifiedCount === 0) {
+    if (updated.matchedCount === 0) {
         // rollback
         await profiles.updateOne({ _id: profile._id }, {
             $pull: { following: profileId }

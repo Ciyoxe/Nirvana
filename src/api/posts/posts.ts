@@ -143,7 +143,7 @@ export async function getPost(selfId: ObjectId, postId: string) {
     if (!profile)
         throw new Error("Profile not found");
 
-    const post = await posts.findOne([
+    const post = await posts.aggregate([
         {
             $match: {
                 _id: new ObjectId(postId),
@@ -165,11 +165,11 @@ export async function getPost(selfId: ObjectId, postId: string) {
                 authorName: "$authorProfile.name"
             }
         },
-    ]);
+    ]).next();
     if (!post)
         throw new Error("Post not found");
 
-    return post as WithId<Post & { authorName: string }>;
+    return post as any as WithId<Post> & { authorName: string };
 }
 
 export async function deletePost(selfId: ObjectId, postId: string) {
