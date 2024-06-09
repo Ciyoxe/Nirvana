@@ -2,7 +2,7 @@ import "dotenv/config";
 import express      from "express";
 import cookieParser from "cookie-parser";
 
-import { createFileLogger } from "./utils";
+import { createFileLogger, getEnv } from "./utils";
 
 import rateLimit from "express-rate-limit";
 import authMiddleware from "./api/auth/middleware";
@@ -51,6 +51,6 @@ express()
 
 .use((req, res) => res.sendFile("index.html", { root: "public" }))
 
-.listen(3000, () => 
-    console.log("Listening on port 3000")
+.listen(getEnv("PORT"), () => 
+    console.log("Listening on port " + getEnv("PORT"))
 );
